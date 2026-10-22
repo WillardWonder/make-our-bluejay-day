@@ -361,6 +361,17 @@ th{font:800 13px var(--display);letter-spacing:.1em;text-transform:uppercase;col
 @keyframes fill{from{transform:translateY(100%)}to{transform:none}}
 
 /* ---------- hero v3: clean poster, handwritten note ---------- */
+/* the idea */
+.idea{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:18px 40px;padding-block:34px 6px;align-items:start}
+@media (max-width:820px){.idea{grid-template-columns:1fr}}
+.idea h2{font:900 clamp(36px,5vw,52px)/.95 var(--display);text-transform:uppercase;margin-top:8px}
+.idea-lead p{margin:12px 0 0;color:#d4dcf5;font-size:17px;line-height:1.55}
+.idea-steps{list-style:none;margin:0;padding:0;display:grid;gap:10px;counter-reset:s}
+.idea-steps li{counter-increment:s;display:grid;grid-template-columns:40px 1fr;gap:2px 12px;background:var(--navy);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.idea-steps li::before{content:counter(s);grid-row:span 2;font:900 34px/1 var(--display);color:var(--red-soft)}
+.idea-steps b{font:800 19px var(--display);letter-spacing:.06em;text-transform:uppercase}
+.idea-steps span{color:var(--muted);font-size:15px;line-height:1.5}
+
 .poster .fig .cut{width:auto;max-width:100%;max-height:520px;margin-bottom:-40px;filter:drop-shadow(0 22px 30px rgba(0,0,0,.55)) drop-shadow(0 0 46px rgba(77,132,240,.35))}
 @media (max-width:820px){.poster .fig .cut{max-height:400px;margin-bottom:0}}
 
@@ -378,6 +389,7 @@ th{font:800 13px var(--display);letter-spacing:.1em;text-transform:uppercase;col
   background-color:var(--paper);background-position:0 0,0 16px}
 .bubble p{font:400 20px/34px var(--note);margin:0 0 34px;color:#1f2a52;max-width:none}
 .bubble p:last-of-type{margin-bottom:0}
+.bubble p:first-of-type{margin-bottom:0;font-weight:700}
 .bubble .sig{font:700 30px/1 var(--hand);color:var(--red);margin-top:8px;justify-content:flex-end;padding-right:10px}
 .bubble::before{left:-26px;bottom:auto;top:46%}
 @media (max-width:820px){.bubble::before{top:-28px;left:50%}.bubble p{font-size:18.5px;line-height:32px;margin-bottom:32px}}
@@ -414,7 +426,7 @@ function seasonDays(){const ev={};EVENTS.forEach(([key,name,where,post,end,label
   for(;d<=stop;d.setUTCDate(d.getUTCDate()+1)){const key=d.toISOString().slice(0,10),wd=d.getUTCDay();
     if(ev[key]){out.push(ev[key]);continue}if(key>"2027-02-04"||wd===0||wd===6||BREAKS[key])continue;
     out.push({key,kind:"practice",name:"Practice",where:"",post:false,end:null,label:"Practice"})}return out}
-const DEFAULT_ASK=first=>`Hi, it's ${first}! This season I'm putting in the work: in the practice room, on the mat, and in the classroom. Wrestling is tough, and some days it's just me out there.\n\nWould you sponsor one of my days? A practice is {practice} and a meet is {meet}. When you do, leave me a note. I'll open it the morning of your day, and it'll remind me who's in my corner.\n\nThank you for helping me become the best version of me.`;
+const DEFAULT_ASK=first=>`Hi, it's ${first}!\n\nThis season I'm chasing the best version of me: in the practice room, on the mat, and in the classroom. Wrestling is hard, and some mornings it's just me and the mat.\n\nWill you sponsor one of my days? Even one {practice} practice makes a difference. A meet is {meet}.\n\nHere's the part I love: leave me a note. I'll open it the morning of your day, and on the tough days, your words will keep me going.\n\nNo pressure at all. Thank you for being in my corner!`;
 
 /* ======================================================================
    Helpers
@@ -619,7 +631,7 @@ function render(){
   app.append(poster(w),strip(w));
   const main=h("div",{class:"wrap"});app.append(main);
   if(isMine())main.append(locker(w));
-  main.append(rosterChips(),rules(),calendar(w),backers(w),standings(),howTo());
+  main.append(rosterChips(),idea(w),rules(),calendar(w),backers(w),standings());
   if(S.auth.admin)main.append(orgPanel());
   app.append(footer());
   if(S.sel.size&&!S.modal)app.append(cartBar(w));
@@ -657,11 +669,15 @@ function poster(w){const first=firstName(w.name),full=w.name.replace(/\s*\(sampl
           h("a",{class:"cta",href:"#calendar",onclick:jump("calendar")},"Sponsor a day"),
           h("span",null,sponsors?[h("b",null,sponsors+" "+(sponsors===1?"person is":"people are")),` in ${first}'s corner`]:"Be the first person in "+first+"'s corner")))))}
 
-function strip(w){const open=days().filter(d=>!isOff(d.key));const paid=open.filter(d=>{const c=claimOf(d.key);return c&&c.status==="paid"}).length;
-  const sealed=days().filter(d=>{const c=S.claims[d.key];return c&&c.status==="paid"&&c.hasNote&&d.key>api.today()}).length;
+function strip(w){const today=api.today();const live=days().filter(d=>!isOff(d.key));
+  const months=[...new Set(live.map(d=>d.key.slice(0,7)))];
+  const m=months.find(x=>x>=today.slice(0,7))||months[months.length-1];
+  const inM=live.filter(d=>d.key.startsWith(m)),filled=inM.filter(d=>{const c=claimOf(d.key);return c&&c.status==="paid"}).length;
+  const mName=F(m+"-01",{month:"long"});const left=inM.length-filled;
+  const sealed=days().filter(d=>{const c=S.claims[d.key];return c&&c.status==="paid"&&c.hasNote&&d.key>today}).length;
   return h("section",{class:"strip","aria-label":"Progress"},h("div",{class:"wrap"},
-    h("div",{class:"singlet"},singletSVG(open.length?paid/open.length:0)),
-    h("div",{class:"st"},h("b",{class:"num"},paid+" / "+open.length),h("span",null,"days sponsored")),
+    h("div",{class:"singlet"},singletSVG(inM.length?filled/inM.length:0)),
+    h("div",{class:"st"},h("b",{class:"num"},filled+" / "+inM.length),h("span",null,mName+" days filled"+(left?" · "+left+" to go":" · full!"))),
     h("div",{class:"st gold"},h("b",{class:"num"},money(w.raisedCents||0)),h("span",null,"raised for the team")),
     h("div",{class:"st"},h("b",{class:"num"},String(sealed)),h("span",null,"sealed notes waiting"))))}
 
@@ -674,7 +690,6 @@ function rules(){const p=S.season.practicePriceCents;const post=days().filter(d=
     h("div",{class:"rule"},h("b",null,"Practice"),h("span",{class:"p num"},money(p)),h("span",null,"A day in the room")),
     h("div",{class:"rule ev"},h("b",null,"Meet"),h("span",{class:"p num"},money(p*S.season.eventMultiplier)),h("span",null,"Duals and tournaments")),
     h("div",{class:"rule post"},h("b",null,"Postseason"),h("span",{class:"p num"},money(lo)+"–"+money(hi).slice(1)),h("span",null,"Regional · Sectional · State"))),
-    h("p",{class:"journey"},h("b",null,"You're backing her journey, not a result. "),"Each day you sponsor supports her for that day, whether she's on the mat, in the practice room, or cheering from the side. If she doesn't qualify for a postseason event, your support still counts and your note still opens that morning to keep her going."),
     h("p",{class:"backer-line"},h("b",null,S.season.rewardName+": "),S.season.rewardText))}
 
 /* ---------- month calendars ---------- */
@@ -765,10 +780,14 @@ function standings(){const list=roster().slice().sort((a,b)=>(b.raisedCents||0)-
       h("span",{class:"bar"},h("i",{style:`width:${Math.round(100*(w.raisedCents||0)/top)}%`})),
       h("span",{class:"amt num"},money(w.raisedCents||0),h("small",null,(w.daysPaid||0)+((w.daysPaid||0)===1?" day · ":" days · ")+(w.sponsorCount||0)+((w.sponsorCount||0)===1?" sponsor":" sponsors"))))}))) }
 
-function howTo(){return h("section",{class:"panel",id:"how"},h("div",{class:"sechead"},h("h2",null,"How it works")),h("div",{class:"howto"},
-  h("div",null,h("b",null,"1"),h("h3",null,"Pick her days"),h("p",null,"Practices, meets, and postseason days. You support her for that day of her journey, not a result.")),
-  h("div",null,h("b",null,"2"),h("h3",null,"Leave a note"),h("p",null,"She opens it the morning of your day, on the mat or not. Your words keep her going and stay in her locker all season.")),
-  h("div",null,h("b",null,"3"),h("h3",null,"Pay the team"),h("p",null,S.season.payNote+" Your days turn blue the moment the payment goes through."))))}
+function idea(w){const first=firstName(w.name);const n=days().filter(d=>!isOff(d.key)).length;
+  return h("section",{class:"idea",id:"how","aria-labelledby":"idea-h"},
+    h("div",{class:"idea-lead"},h("div",{class:"eyebrow"},"The idea"),h("h2",{id:"idea-h"},"Sponsor one of her "+n+" days"),
+      h("p",null,"A wrestling season is "+n+" days of work most people never see. Make Our Bluejay Day lets you own one of them for "+first+": you back her for that day, and you send her a note she opens that morning.")),
+    h("ol",{class:"idea-steps"},
+      h("li",null,h("b",null,"Pick her day"),h("span",null,"A practice, a meet, or a postseason day. You're backing her journey, not a result: if she doesn't qualify or doesn't wrestle that day, your day still counts.")),
+      h("li",null,h("b",null,"Leave her a note"),h("span",null,"It stays sealed until 5 a.m. on your day, after a coach reads it. On the hard mornings, it's what keeps her going. She keeps every note all season.")),
+      h("li",null,h("b",null,"It lifts the whole team"),h("span",null,S.season.payNote+" Your day turns blue on her calendar as soon as the payment goes through."))))}
 
 function footer(){const a=S.auth;return h("footer",{class:"wrap foot"},h("span",null,"Merrill High School Girls Wrestling · 2026–27 · Schedule from the team schedule and the WIAA calendar."),
   a.signedIn?h("span",null,a.email+" · ",h("button",{onclick:()=>{api.signOut();if(api.mode==="demo")S.demoView="public"}},"Sign out")):h("button",{onclick:()=>{S.modal={type:"signin",stage:"email",email:""};render()}},"Wrestler or coach sign-in"))}
