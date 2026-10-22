@@ -1,4 +1,4 @@
-# Bluejay Backers
+# Make Our Bluejay Day
 
 Sponsor-a-day fundraiser page for Merrill High School girls wrestling, 2026–27.
 

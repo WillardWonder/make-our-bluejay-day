@@ -1,5 +1,5 @@
 <meta charset="utf-8">
-<title>Bluejay Backers</title>
+<title>Make Our Bluejay Day</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="Sponsor a Merrill girls wrestler for a day of practice or a meet, and leave her a note she opens that morning.">
 <link rel="icon" href="bluejay.png">
@@ -36,7 +36,7 @@ a{color:var(--sky)}
 .top .wrap{display:flex;align-items:center;gap:10px;padding-block:7px}
 .top img{width:40px;height:auto}
 .brand{display:grid;line-height:1;min-width:0}
-.brand b{font:900 21px var(--display);text-transform:uppercase;letter-spacing:.02em}
+.brand b{font:900 20px var(--display);text-transform:uppercase;letter-spacing:.02em}
 .brand span{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
 .top nav{margin-left:auto;display:flex;gap:2px;align-items:center}
 .top nav a,.top nav button{color:var(--muted);text-decoration:none;font-weight:700;font-size:14px;padding:7px 10px;border-radius:6px;white-space:nowrap}
@@ -594,7 +594,7 @@ function render(){
 
 function topBar(){const a=S.auth;return h("header",{class:"top"},h("div",{class:"wrap"},
   h("img",{src:"bluejay.png",alt:"Merrill Bluejays"}),
-  h("div",{class:"brand"},h("b",null,"Bluejay Backers"),h("span",null,"Merrill Girls Wrestling")),
+  h("div",{class:"brand"},h("b",null,"Make Our Bluejay Day"),h("span",null,"Merrill Girls Wrestling")),
   h("nav",{"aria-label":"Sections"},
     h("a",{href:"#calendar",class:"hide-sm",onclick:jump("calendar")},"Calendar"),h("a",{href:"#standings",class:"hide-sm",onclick:jump("standings")},"Standings"),
     a.wrestlerId?h("button",{class:"me",onclick:()=>{select(a.wrestlerId);setTimeout(()=>document.getElementById("locker")?.scrollIntoView({behavior:"smooth"}),40)}},"My page"):null,
@@ -752,7 +752,7 @@ function locker(w){const today=api.today(),first=firstName(w.name);const todays=
     h("div",{class:"card"},h("h3",null,"Your photo"),h("p",null,"An action shot or a pose in your singlet. For the cutout look, remove the background first: on iPhone, press and hold yourself in the Photos app and tap Copy or Share; on Android, use Cutout in Google Photos. Save it as PNG."),
       h("div",{class:"btns",style:"justify-content:flex-start"},h("label",{class:"btn blu",for:"my-photo",style:"cursor:pointer"},w.photoUrl?"Replace photo":"Upload photo",file)),
       h("h3",{style:"margin-top:10px"},"Ask your people"),h("p",null,"Texts from you work far better than a post. Send this to family, neighbors, and family friends one at a time."),
-      (()=>{const link=shareLink(w);const msg=`Hi! It's ${first}. I'm wrestling for Merrill this winter and raising money for our team. You can sponsor one of my practices (${money(S.season.practicePriceCents)}) or a meet (${money(S.season.practicePriceCents*S.season.eventMultiplier)}) and leave me a note I'll open that morning. Here's my calendar: ${link}\nIt would mean a lot. Thank you!`;
+      (()=>{const link=shareLink(w);const msg=`Hi! It's ${first}. Will you make my Bluejay day? I'm wrestling for Merrill this winter and raising money for our team. You can sponsor one of my practices (${money(S.season.practicePriceCents)}) or a meet (${money(S.season.practicePriceCents*S.season.eventMultiplier)}) and leave me a note I'll open that morning. Here's my calendar: ${link}\nIt would mean a lot. Thank you!`;
         const el=h("div",{class:"share"},msg);return h("div",{style:"display:grid;gap:8px"},el,h("div",{class:"btns",style:"justify-content:flex-start"},h("button",{class:"btn",onclick:()=>copy(msg,el)},"Copy text"),h("button",{class:"btn",onclick:()=>copy(link)},"Copy link")))})())));
   return box}
 const shareLink=w=>(api.mode==="live"?location.origin+location.pathname:"https://<your-site>.web.app/")+"#"+w.id;
@@ -843,7 +843,7 @@ function checkoutSheet(box,m){const w=curW(),s=picks(m.keys),first=firstName(w.n
       S.payMode==="mock"?h("p",{class:"mod"},"Stand-in payment step. When the booster club picks its processor, this button opens that checkout and the calendar updates when the payment clears."):null,
       h("div",{class:"btns"},h("button",{class:"btn",onclick:close},"Pay later")))}
   else{const backer=m.paid.units>=5;
-    box.append(h("div",{class:"done"},h("img",{src:"bluejay.png",alt:""}),h("h3",{id:"sheet-h"},"You're in "+first+"'s corner"),
+    box.append(h("div",{class:"done"},h("img",{src:"bluejay.png",alt:""}),h("h3",{id:"sheet-h"},"You made "+first+"'s day"),
       h("p",{style:"margin:0;color:var(--muted)"},money(m.paid.total)+(m.paid.pending?" for the team, once your payment arrives. ":" for the team. ")+(m.form.message?"Your note is sealed. She'll open it the morning of "+longDay(m.form.revealDay)+".":"Thank you for backing Merrill girls wrestling.")),
       backer?h("span",{class:"badge"},"You're a "+S.season.rewardName):null),h("div",{class:"btns"},h("button",{class:"btn pri",onclick:close},"Done")))}
 }
