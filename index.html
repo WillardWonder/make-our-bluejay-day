@@ -3,7 +3,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="Sponsor a Merrill girls wrestler for a day of practice or a meet, and leave her a note she opens that morning.">
 <link rel="icon" href="bluejay.png">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Caveat:wght@600;700&family=Figtree:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Caveat:wght@600;700&family=Kalam:wght@400;700&family=Figtree:wght@400;500;600;700;800&display=swap">
 <style>
 /* Layout: a fight-poster hero on a wrestling mat (her cutout, her name huge behind her, her words in a white speech
    bubble), then month calendars you tap like a wall calendar, then standings. One deliberate dark look:
@@ -16,6 +16,7 @@
   --display:"Big Shoulders Display","Oswald","Arial Narrow",Impact,sans-serif;
   --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
   --hand:"Caveat","Bradley Hand","Segoe Print",cursive;
+  --note:"Kalam","Bradley Hand","Segoe Print","Comic Sans MS",cursive;
   color-scheme:dark;
 }
 html{background:var(--night)}
@@ -358,6 +359,41 @@ th{font:800 13px var(--display);letter-spacing:.1em;text-transform:uppercase;col
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes bubble{from{opacity:0;transform:scale(.85) rotate(-3deg)}to{opacity:1;transform:rotate(-.6deg)}}
 @keyframes fill{from{transform:translateY(100%)}to{transform:none}}
+
+/* ---------- hero v3: clean poster, handwritten note ---------- */
+@media (max-width:440px){.brand b{font-size:17px}.brand span{font-size:9.5px}}
+.poster .wrap{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:20px 48px;align-items:center;padding-block:44px 40px;min-height:0}
+@media (max-width:820px){.poster .wrap{grid-template-columns:1fr;padding-block:26px 28px;gap:18px}}
+.poster .fig{min-height:0;align-self:center}
+.fig .framed{width:min(300px,72vw);margin:0;object-position:50% 8%;border-radius:200px 200px 18px 18px;border:5px solid var(--ink);box-shadow:0 0 0 6px var(--red),0 24px 50px rgba(0,0,0,.55)}
+.poster .say{padding-bottom:0;display:grid;gap:14px;align-content:center}
+.poster .name{font:900 clamp(52px,7.5vw,92px)/.88 var(--display);text-transform:uppercase;letter-spacing:.005em;margin:0}
+.poster .bigname,.fig .wt{display:none}
+.bubble{margin-top:6px;padding:18px 26px 16px 46px;border-radius:22px;transform:rotate(-.8deg);
+  background:linear-gradient(90deg,transparent 0 30px,rgba(227,38,60,.35) 30px 31.5px,transparent 31.5px),
+             repeating-linear-gradient(180deg,var(--paper) 0 33px,rgba(45,104,219,.16) 33px 34px);
+  background-color:var(--paper);background-position:0 0,0 16px}
+.bubble p{font:400 20px/34px var(--note);margin:0 0 34px;color:#1f2a52;max-width:none}
+.bubble p:last-of-type{margin-bottom:0}
+.bubble .sig{font:700 30px/1 var(--hand);color:var(--red);margin-top:8px;justify-content:flex-end;padding-right:10px}
+.bubble::before{left:-26px;bottom:auto;top:46%}
+@media (max-width:820px){.bubble::before{top:-28px;left:50%}.bubble p{font-size:18.5px;line-height:32px;margin-bottom:32px}}
+.corner{margin-top:4px;gap:12px 20px}
+.cta{font-size:21px;padding:13px 22px 12px}
+.strip .wrap{padding-block:14px}
+.st b{font-size:34px}
+/* pricing */
+.pricing{padding-top:22px;display:grid;gap:14px}
+.rules{margin-top:0}
+.rule{display:grid;grid-template-columns:1fr;gap:2px;padding:16px 18px}
+.rule b{font:800 14px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.rule .p{grid-row:auto;font:900 44px/1 var(--display);color:var(--ink)}
+.rule span:last-child{font-size:14px;color:var(--muted)}
+.rule.ev .p{color:var(--red-soft)} .rule.post .p{color:var(--gold)}
+.journey{margin:0;background:linear-gradient(100deg,var(--navy-2),var(--navy));border:1px solid var(--line-2);border-left:4px solid var(--gold);border-radius:12px;padding:16px 18px;font-size:16px;line-height:1.55;max-width:none}
+.journey b{color:var(--gold)}
+.backer-line{margin:0;color:var(--muted);font-size:14px}
+.backer-line b{color:var(--ink)}
 </style>
 
 <div id="app"></div>
@@ -368,9 +404,9 @@ th{font:800 13px var(--display);letter-spacing:.1em;text-transform:uppercase;col
 /* ======================================================================
    Season (demo fallback; the live site reads config/season from Firestore)
    ====================================================================== */
-const EVENTS=[["2026-12-08","Season-opening scrimmage","Merrill (home)",0,null,"Scrimmage"],["2026-12-11","Waunakee","Away",0,null,"@ Waunakee"],["2026-12-15","GNC/WVC multi-school","Antigo or SPASH",0,null,"GNC/WVC"],["2026-12-18","Added event (Dec 18 or 19)","Date and site to be announced",0,null,"TBA event"],["2026-12-22","Hodag Dome Tournament","Rhinelander",0,null,"Hodag Dome"],["2026-12-30","Waukesha West","Overnight trip",0,null,"@ Waukesha W."],["2027-01-08","Wausau West 16-team duals","UW-Stevens Point",0,null,"UWSP Duals"],["2027-01-09","Bluejay Challenge","Merrill (home)",0,null,"Bluejay Challenge"],["2027-01-12","GNC/WVC multi-school","Lakeland or Wausau West",0,null,"GNC/WVC"],["2027-01-14","Boys & girls duals vs Tomahawk","Merrill (home)",0,null,"vs Tomahawk"],["2027-01-16","Wausau West Individual Tournament","Wausau",0,null,"Wausau West Ind."],["2027-01-19","Merrill Finale Tournament","Merrill (home)",0,null,"Finale"],["2027-01-21","Home dual or multi-school","Merrill (home)",0,null,"Home meet"],["2027-01-26","GNC/WVC Conference Tournament","Tomahawk",0,null,"Conference"],["2027-01-30","Eau Claire North Tournament","Eau Claire",0,null,"EC North"],["2027-02-05","WIAA Regional","Merrill (home)",1,null,"Regional"],["2027-02-12","WIAA Individual Sectional","Antigo",1,null,"Sectional"],["2027-02-19","WIAA Team Sectional","Site to be announced",1,null,"Team Sectional"],["2027-02-25","WIAA Individual State","Kohl Center, Madison",1,"2027-02-27","State"],["2027-03-05","WIAA Team State","La Crosse Center",1,"2027-03-06","Team State"]];
+const EVENTS=[["2026-12-08","Season-opening scrimmage","Merrill (home)",0,null,"Scrimmage"],["2026-12-11","Waunakee","Away",0,null,"@ Waunakee"],["2026-12-15","GNC/WVC multi-school","Antigo or SPASH",0,null,"GNC/WVC"],["2026-12-18","Added event (Dec 18 or 19)","Date and site to be announced",0,null,"TBA event"],["2026-12-22","Hodag Dome Tournament","Rhinelander",0,null,"Hodag Dome"],["2026-12-30","Waukesha West","Overnight trip",0,null,"@ Waukesha W."],["2027-01-08","Wausau West 16-team duals","UW-Stevens Point",0,null,"UWSP Duals"],["2027-01-09","Bluejay Challenge","Merrill (home)",0,null,"Bluejay Challenge"],["2027-01-12","GNC/WVC multi-school","Lakeland or Wausau West",0,null,"GNC/WVC"],["2027-01-14","Boys & girls duals vs Tomahawk","Merrill (home)",0,null,"vs Tomahawk"],["2027-01-16","Wausau West Individual Tournament","Wausau",0,null,"Wausau West Ind."],["2027-01-19","Merrill Finale Tournament","Merrill (home)",0,null,"Finale"],["2027-01-21","Home dual or multi-school","Merrill (home)",0,null,"Home meet"],["2027-01-26","GNC/WVC Conference Tournament","Tomahawk",0,null,"Conference"],["2027-01-30","Eau Claire North Tournament","Eau Claire",0,null,"EC North"],["2027-02-05","WIAA Regional","Merrill (home)",1,null,"Regional",4000],["2027-02-12","WIAA Individual Sectional","Antigo",1,null,"Sectional",5000],["2027-02-19","WIAA Team Sectional","Site to be announced",1,null,"Team Sectional",5000],["2027-02-25","WIAA Individual State","Kohl Center, Madison",1,"2027-02-27","State",10000],["2027-03-05","WIAA Team State","La Crosse Center",1,"2027-03-06","Team State",10000]];
 const BREAKS={"2026-11-26":"Thanksgiving","2026-11-27":"Thanksgiving break","2026-12-24":"Christmas Eve","2026-12-25":"Christmas","2026-12-29":"Travel to Waukesha","2026-12-31":"New Year's Eve","2027-01-01":"New Year's Day"};
-function seasonDays(){const ev={};EVENTS.forEach(([key,name,where,post,end,label])=>ev[key]={key,kind:"event",name,where,post:!!post,end,label});
+function seasonDays(){const ev={};EVENTS.forEach(([key,name,where,post,end,label,priceCents])=>ev[key]={key,kind:"event",name,where,post:!!post,end,label,priceCents:priceCents||null});
   const out=[];const d=new Date("2026-11-16T00:00:00Z"),stop=new Date("2027-03-06T00:00:00Z");
   for(;d<=stop;d.setUTCDate(d.getUTCDate()+1)){const key=d.toISOString().slice(0,10),wd=d.getUTCDay();
     if(ev[key]){out.push(ev[key]);continue}if(key>"2027-02-04"||wd===0||wd===6||BREAKS[key])continue;
@@ -407,9 +443,6 @@ function matSVG(){return frag(`<svg class="mat" viewBox="0 0 1000 1000" aria-hid
   <circle cx="500" cy="500" r="480" fill="none" stroke="#e3263c" stroke-opacity=".45" stroke-width="30"/>
   <circle cx="500" cy="500" r="450" fill="#132a63" fill-opacity=".55"/>
   <circle cx="500" cy="500" r="370" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width="7"/>
-  <circle cx="500" cy="500" r="64" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width="7"/>
-  <rect x="468" y="482" width="14" height="46" rx="3" fill="#e3263c" fill-opacity=".7"/>
-  <rect x="518" y="472" width="14" height="46" rx="3" fill="#4d84f0" fill-opacity=".85"/>
 </svg>`)}
 
 function placeholderFigure(){return frag(`<svg class="ph" viewBox="0 0 320 420" role="img" aria-label="Photo placeholder">
@@ -439,11 +472,11 @@ function makeDemoBackend(){
   const season={days:seasonDays(),breaks:BREAKS,offDays:[],practicePriceCents:500,eventMultiplier:5,rewardName:"Bluejay Backer",
     rewardText:"Sponsor 5 practices or 1 meet for the same wrestler and you're a Bluejay Backer: a handwritten thank-you from her and your name on the Backers wall at the Finale on Jan 19.",
     payNote:"Every dollar goes to the Merrill Wrestling booster club for the girls' team."};
-  const W=[["d1","Addison",100],["d2","Brynn",114],["d3","Kenzie",126],["d4","Maya",138],["d5","Reagan",152],["d6","Tessa",185]].map(([id,n,wt])=>({id,name:n+" (sample)",weight:String(wt),photoUrl:"",photoCutout:false,askText:DEFAULT_ASK(n),active:true,raisedCents:0,daysPaid:0,sponsorCount:0}));
-  const emails={d1:"addison.s@example.org",d2:"brynn.k@example.org",d3:"kenzie.r@example.org",d4:"maya.t@example.org",d5:"reagan.l@example.org",d6:"tessa.w@example.org"};
+  const W=[["d1","Ava",100],["d2","Brynn",114],["d3","Addison Clark",""],["d4","Maya",138],["d5","Reagan",152],["d6","Tessa",185]].map(([id,n,wt])=>({id,name:id==="d3"?n:n+" (sample)",weight:String(wt),photoUrl:id==="d3"?"addison.jpg":"",photoCutout:false,askText:DEFAULT_ASK(firstName(n)),active:true,raisedCents:0,daysPaid:0,sponsorCount:0}));
+  const emails={d1:"ava.s@example.org",d2:"brynn.k@example.org",d3:"addison.c@example.org",d4:"maya.t@example.org",d5:"reagan.l@example.org",d6:"tessa.w@example.org"};
   const claims={},orders={},messages={};let seq=1;const L=new Set();const emit=()=>L.forEach(f=>f());
   const dayMap=Object.fromEntries(season.days.map(d=>[d.key,d]));
-  const price=k=>dayMap[k].kind==="event"?season.practicePriceCents*5:season.practicePriceCents;
+  const price=k=>dayMap[k].priceCents||(dayMap[k].kind==="event"?season.practicePriceCents*5:season.practicePriceCents);
   const taken=c=>c&&(c.status==="paid"||(c.status==="held"&&c.holdExpires>Date.now()));
   function place(inp,method){const keys=[...new Set(inp.dayKeys)].sort();const tk=keys.filter(k=>taken(claims[inp.wrestlerId+"__"+k]));
     if(tk.length){const e=new Error("Someone just took one of those days.");e.details={taken:tk};throw e}
@@ -556,7 +589,7 @@ const roster=()=>S.wrestlers.filter(w=>w.active!==false).sort((a,b)=>(+a.weight|
 const curW=()=>S.wrestlers.find(w=>w.id===S.cur);
 const days=()=>S.season?S.season.days:[];
 const dayMap=()=>Object.fromEntries(days().map(d=>[d.key,d]));
-const priceOf=d=>d.kind==="event"?S.season.practicePriceCents*S.season.eventMultiplier:S.season.practicePriceCents;
+const priceOf=d=>d.priceCents?d.priceCents:d.kind==="event"?S.season.practicePriceCents*S.season.eventMultiplier:S.season.practicePriceCents;
 const isOff=k=>!!S.season&&(S.season.offDays||[]).includes(k);
 const claimOf=k=>{const c=S.claims[k];if(!c)return null;if(c.status==="paid")return c;if(c.status==="held"&&c.holdExpires>Date.now())return c;return null};
 const isMine=()=>S.auth.wrestlerId&&S.auth.wrestlerId===S.cur;
@@ -604,23 +637,22 @@ const jump=id=>e=>{e.preventDefault();document.getElementById(id)?.scrollIntoVie
 
 function demoBar(){const v=S.demoView;const set=x=>()=>{S.demoView=x;api.demoAs(x);if(x==="athlete")select("d3");render();window.scrollTo({top:0})};
   return h("div",{class:"demo"},h("div",{class:"wrap"},h("span",null,h("b",null,"Preview. "),"Sample girls and sponsors; nothing is saved and no money moves. It pretends today is Mon, Dec 14."),
-    h("div",{class:"views",role:"group","aria-label":"Preview as"},[["public","Sponsor"],["athlete","Kenzie signed in"],["admin","Coach"]].map(([k,l])=>h("button",{"aria-pressed":String(v===k),onclick:set(k)},l)))))}
+    h("div",{class:"views",role:"group","aria-label":"Preview as"},[["public","Sponsor"],["athlete","Addison signed in"],["admin","Coach"]].map(([k,l])=>h("button",{"aria-pressed":String(v===k),onclick:set(k)},l)))))}
 
-function poster(w){const first=firstName(w.name);
+function poster(w){const first=firstName(w.name),full=w.name.replace(/\s*\(sample\)\s*/,"");
   const fig=h("div",{class:"fig"});
-  if(w.photoUrl)fig.append(h("img",{class:w.photoCutout?"cut":"framed",src:w.photoUrl,alt:first+" in her Merrill singlet"}));else fig.append(placeholderFigure());
-  if(w.weight)fig.append(h("div",{class:"wt","aria-label":w.weight+" pound weight class"},h("b",null,w.weight),h("span",null,"LBS")));
+  if(w.photoUrl)fig.append(h("img",{class:w.photoCutout?"cut":"framed",src:w.photoUrl,alt:full}));else fig.append(placeholderFigure());
   const paras=fillAsk(w.askText,w).split(/\n\s*\n/).map(s=>s.trim()).filter(Boolean);
   const sponsors=w.sponsorCount||0;
-  const names=[...new Set(Object.values(S.claims).filter(c=>c.status==="paid").map(c=>c.displayName))].slice(0,5);
-  return h("section",{class:"poster","aria-label":first+"'s message"},matSVG(),h("div",{class:"beam","aria-hidden":"true"}),h("div",{class:"edge","aria-hidden":"true"}),h("div",{class:"bigname","aria-hidden":"true"},first),
+  return h("section",{class:"poster","aria-label":full},matSVG(),h("div",{class:"beam","aria-hidden":"true"}),h("div",{class:"edge","aria-hidden":"true"}),
     h("div",{class:"wrap"},fig,
       h("div",{class:"say"},
-        h("div",{class:"bubble"},h("span",{class:"tape","aria-hidden":"true"}),h("div",{class:"hi"},"Be in my ",h("em",null,"corner")),paras.map(p=>h("p",null,p)),h("div",{class:"sig"},"— "+first,h("img",{src:"bluejay.png",alt:""}))),
+        h("div",{class:"eyebrow"},"Merrill Girls Wrestling · 2026–27"+(w.weight?" · "+w.weight+" lbs":"")),
+        h("h1",{class:"name"},full),
+        h("div",{class:"bubble"},h("span",{class:"tape","aria-hidden":"true"}),paras.map(p=>h("p",null,p)),h("div",{class:"sig"},"♡ "+first)),
         h("div",{class:"corner"},
-          names.length?h("div",{class:"who","aria-hidden":"true"},names.map((n,i)=>h("i",{style:"background:"+DOT_COLORS[i%DOT_COLORS.length]},n==="Anonymous"?"♥":initials(n)))):null,
-          h("span",null,sponsors?[h("b",null,sponsors+" "+(sponsors===1?"person is":"people are")),` in ${first}'s corner`]:"Be the first person in "+first+"'s corner"),
-          h("a",{class:"cta",href:"#calendar",onclick:jump("calendar")},"Sponsor a day"),h("span",{class:"scribble","aria-hidden":"true"},"only "+money(S.season.practicePriceCents)+" a day!")))))}
+          h("a",{class:"cta",href:"#calendar",onclick:jump("calendar")},"Sponsor a day"),
+          h("span",null,sponsors?[h("b",null,sponsors+" "+(sponsors===1?"person is":"people are")),` in ${first}'s corner`]:"Be the first person in "+first+"'s corner")))))}
 
 function strip(w){const open=days().filter(d=>!isOff(d.key));const paid=open.filter(d=>{const c=claimOf(d.key);return c&&c.status==="paid"}).length;
   const sealed=days().filter(d=>{const c=S.claims[d.key];return c&&c.status==="paid"&&c.hasNote&&d.key>api.today()}).length;
@@ -633,10 +665,14 @@ function strip(w){const open=days().filter(d=>!isOff(d.key));const paid=open.fil
 function rosterChips(){const list=roster();if(list.length<2)return null;
   return h("div",{class:"roster",role:"group","aria-label":"Choose a wrestler"},list.map(w=>h("button",{class:"tagbtn","aria-pressed":String(w.id===S.cur),onclick:()=>{select(w.id);window.scrollTo({top:0})}},h("span",{class:"w"},w.weight||"—"),w.name)))}
 
-function rules(){const p=S.season.practicePriceCents;return h("div",{class:"rules"},
-  h("div",{class:"rule"},h("span",{class:"p num"},money(p)),h("b",null,"Practice"),h("span",null,"One day in the room: drilling, live goes, conditioning.")),
-  h("div",{class:"rule ev"},h("span",{class:"p num"},money(p*S.season.eventMultiplier)),h("b",null,"Meet"),h("span",null,"Same as a week of practice. Duals, tournaments, WIAA.")),
-  h("div",{class:"rule bk"},h("span",{class:"p"},"5+"),h("b",null,S.season.rewardName),h("span",null,S.season.rewardText)))}
+function rules(){const p=S.season.practicePriceCents;const post=days().filter(d=>d.post&&d.priceCents).map(d=>d.priceCents);
+  const lo=post.length?Math.min(...post):p*5,hi=post.length?Math.max(...post):p*5;
+  return h("section",{class:"pricing"},h("div",{class:"rules"},
+    h("div",{class:"rule"},h("b",null,"Practice"),h("span",{class:"p num"},money(p)),h("span",null,"A day in the room")),
+    h("div",{class:"rule ev"},h("b",null,"Meet"),h("span",{class:"p num"},money(p*S.season.eventMultiplier)),h("span",null,"Duals and tournaments")),
+    h("div",{class:"rule post"},h("b",null,"Postseason"),h("span",{class:"p num"},money(lo)+"–"+money(hi).slice(1)),h("span",null,"Regional · Sectional · State"))),
+    h("p",{class:"journey"},h("b",null,"You're backing her journey, not a result. "),"Each day you sponsor supports her for that day, whether she's on the mat, in the practice room, or cheering from the side. If she doesn't qualify for a postseason event, your support still counts and your note still opens that morning to keep her going."),
+    h("p",{class:"backer-line"},h("b",null,S.season.rewardName+": "),S.season.rewardText))}
 
 /* ---------- month calendars ---------- */
 function calendar(w){
@@ -645,7 +681,7 @@ function calendar(w){
   const months=[...new Set(days().map(d=>d.key.slice(0,7)))];
   const sec=h("section",{class:"cal",id:"calendar"});
   sec.append(h("div",{class:"sechead"},h("h2",null,S.dayTool?"Turn days off":first+"'s season"),
-    h("p",null,S.dayTool?"Organizer tool: tap a practice to cancel it or bring it back.":"Tap any open day to pick it. Tap + to grab a whole week of practice. Then sponsor them all at once and leave her a note."),S.dayTool?null:h("span",{class:"scribble","aria-hidden":"true"},"pick a day!",frag(ARROW_DOWN))));
+    h("p",null,S.dayTool?"Organizer tool: tap a practice to cancel it or bring it back.":"Tap open days to pick them, or + for a whole week of practice. Then sponsor them together and leave her a note.")));
   sec.append(h("nav",{class:"monthnav","aria-label":"Months"},months.map(m=>{const open=days().filter(d=>d.key.startsWith(m)&&!isOff(d.key)&&!claimOf(d.key)).length;
     return h("a",{href:"#m-"+m,onclick:jump("m-"+m)},F(m+"-01",{month:"short"}),h("small",null,open+" open"))})));
   sec.append(h("div",{class:"legend"},h("span",null,h("i",{style:"background:var(--navy);border:1.5px solid var(--line-2)"}),"Practice"),
@@ -660,7 +696,10 @@ function calendar(w){
     const grid=h("div",{class:"grid",role:"grid","aria-label":F(m+"-01",{month:"long",year:"numeric"})});
     grid.append(h("div",{"aria-hidden":"true"}),...["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(x=>h("div",{class:"dow","aria-hidden":"true"},x.slice(0,window.innerWidth<520?1:3))));
     const lead=firstDay.getUTCDay();const cells=Math.ceil((lead+dim)/7)*7;
+    const seasonFirst=days()[0].key,seasonLast=days()[days().length-1].end||days()[days().length-1].key;
     for(let i=0;i<cells;i++){
+      if(i%7===0){const rk=[];for(let j=0;j<7;j++){const dn=i+j-lead+1;if(dn>=1&&dn<=dim)rk.push(m+"-"+String(dn).padStart(2,"0"))}
+        if(rk.length&&(rk[rk.length-1]<seasonFirst||rk[0]>seasonLast)){i+=6;continue}}
       if(i%7===0){const rowKeys=[];for(let j=0;j<7;j++){const dn=i+j-lead+1;if(dn>=1&&dn<=dim)rowKeys.push(m+"-"+String(dn).padStart(2,"0"))}
         const open=rowKeys.map(k=>map[k]).filter(d=>d&&d.kind==="practice"&&!isOff(d.key)&&!claimOf(d.key));
         const all=open.length&&open.every(d=>S.sel.has(d.key));
@@ -724,8 +763,8 @@ function standings(){const list=roster().slice().sort((a,b)=>(b.raisedCents||0)-
       h("span",{class:"amt num"},money(w.raisedCents||0),h("small",null,(w.daysPaid||0)+((w.daysPaid||0)===1?" day · ":" days · ")+(w.sponsorCount||0)+((w.sponsorCount||0)===1?" sponsor":" sponsors"))))}))) }
 
 function howTo(){return h("section",{class:"panel",id:"how"},h("div",{class:"sechead"},h("h2",null,"How it works")),h("div",{class:"howto"},
-  h("div",null,h("b",null,"1"),h("h3",null,"Pick her days"),h("p",null,"Tap practices and meets on her calendar. Five practices cost the same as one meet.")),
-  h("div",null,h("b",null,"2"),h("h3",null,"Leave a note"),h("p",null,"She opens it the morning of the day you pick, after a coach reads it. It stays in her locker all season.")),
+  h("div",null,h("b",null,"1"),h("h3",null,"Pick her days"),h("p",null,"Practices, meets, and postseason days. You support her for that day of her journey, not a result.")),
+  h("div",null,h("b",null,"2"),h("h3",null,"Leave a note"),h("p",null,"She opens it the morning of your day, on the mat or not. Your words keep her going and stay in her locker all season.")),
   h("div",null,h("b",null,"3"),h("h3",null,"Pay the team"),h("p",null,S.season.payNote+" Your days turn blue the moment the payment goes through."))))}
 
 function footer(){const a=S.auth;return h("footer",{class:"wrap foot"},h("span",null,"Merrill High School Girls Wrestling · 2026–27 · Schedule from the team schedule and the WIAA calendar."),
@@ -814,7 +853,7 @@ function checkoutSheet(box,m){const w=curW(),s=picks(m.keys),first=firstName(w.n
       h("label",{class:"field",for:"c-name"},"Your name",name),
       h("label",{class:"check"},anon,"Show me as Anonymous on her calendar"),
       h("label",{class:"field",for:"c-contact"},h("span",null,"Email or phone ",h("small",null,"(optional; only organizers see it)")),contact),
-      h("p",{class:"mod"},"A coach reads every note before it reaches her."),err,
+      h("p",{class:"mod"},"You're backing her for this day, whatever it brings. Even if she doesn't wrestle it, your note opens that morning to keep her going. A coach reads every note first."),err,
       h("div",{class:"btns"},h("button",{class:"btn",onclick:close},"Cancel"),h("button",{class:"btn pri",onclick:async e=>{
         if(!f.donorName.trim()){err.textContent="Add your name so she knows who to thank.";name.focus();return}
         if(org){m.step=2;render();return}
