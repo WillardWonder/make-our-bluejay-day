@@ -1,0 +1,941 @@
+<meta charset="utf-8">
+<title>Bluejay Backers</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Sponsor a Merrill girls wrestler for a day of practice or a meet, and leave her a note she opens that morning.">
+<link rel="icon" href="bluejay.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Caveat:wght@600;700&family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: a fight-poster hero on a wrestling mat (her cutout, her name huge behind her, her words in a white speech
+   bubble), then month calendars you tap like a wall calendar, then standings. One deliberate dark look:
+   Bluejay royal blue + red on night navy, white for her voice. */
+:root{
+  --night:#060b1b; --navy:#0b1532; --navy-2:#122149; --navy-3:#1a2d60; --line:#203266; --line-2:#2c4488;
+  --ink:#f3f6ff; --muted:#9eabd2; --faint:#6a78a6;
+  --blue:#2d68db; --blue-hi:#4d84f0; --sky:#86aaff; --red:#e3263c; --red-deep:#8e1426; --red-soft:#ff7d8b;
+  --gold:#ffcf5c; --paper:#fbf7ef; --paper-ink:#18203a; --ok:#46d39a;
+  --display:"Big Shoulders Display","Oswald","Arial Narrow",Impact,sans-serif;
+  --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --hand:"Caveat","Bradley Hand","Segoe Print",cursive;
+  color-scheme:dark;
+}
+html{background:var(--night)}
+body{background:var(--night);color:var(--ink);font:16px/1.5 var(--body);-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--night)}
+.wrap{max-width:1100px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:.95;text-wrap:balance}
+.num{font-variant-numeric:tabular-nums}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;padding:0}
+a{color:var(--sky)}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px;border-radius:4px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.eyebrow{font:800 12px/1 var(--body);letter-spacing:.2em;text-transform:uppercase;color:var(--sky)}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:rgba(6,11,27,.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:10px;padding-block:7px}
+.top img{width:40px;height:auto}
+.brand{display:grid;line-height:1;min-width:0}
+.brand b{font:900 21px var(--display);text-transform:uppercase;letter-spacing:.02em}
+.brand span{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.top nav{margin-left:auto;display:flex;gap:2px;align-items:center}
+.top nav a,.top nav button{color:var(--muted);text-decoration:none;font-weight:700;font-size:14px;padding:7px 10px;border-radius:6px;white-space:nowrap}
+.top nav a:hover,.top nav button:hover{color:var(--ink);background:var(--navy-2)}
+.top nav .me{color:var(--ink);background:var(--navy-2);border:1px solid var(--line-2)}
+@media (max-width:620px){.top nav .hide-sm{display:none}}
+
+.demo{background:var(--gold);color:#251b00;font-size:13.5px}
+.demo .wrap{padding-block:8px;display:flex;gap:8px 14px;flex-wrap:wrap;align-items:center}
+.demo b{font-weight:800}
+.demo .views{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
+.demo .views button{border:1.5px solid #251b00;border-radius:999px;padding:3px 11px;font-weight:700;font-size:13px}
+.demo .views button[aria-pressed="true"]{background:#251b00;color:var(--gold)}
+
+/* ---------- poster hero ---------- */
+.poster{position:relative;overflow:hidden;background:radial-gradient(110% 80% at 30% 60%,#18306c 0%,var(--navy) 48%,var(--night) 100%);isolation:isolate}
+.poster .mat{position:absolute;left:27%;top:96%;width:1100px;max-width:none;transform:translate(-50%,-50%);z-index:-2;pointer-events:none}
+@media (max-width:820px){.poster .mat{left:50%;top:44%;width:900px}}
+.poster .bigname{position:absolute;left:0;right:0;top:18px;z-index:-1;text-align:center;font:900 clamp(110px,24vw,300px)/.8 var(--display);text-transform:uppercase;letter-spacing:-.01em;
+  color:transparent;-webkit-text-stroke:2px rgba(134,170,255,.16);white-space:nowrap;overflow:hidden;pointer-events:none}
+.poster .wrap{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:8px 30px;align-items:end;padding-block:30px 0;min-height:520px}
+@media (max-width:820px){.poster .wrap{grid-template-columns:1fr;min-height:0;padding-block:20px 0}}
+.fig{position:relative;align-self:end;display:grid;justify-items:center;min-height:420px}
+@media (max-width:820px){.fig{min-height:0;order:1}}
+.fig .cut{display:block;max-height:500px;width:auto;max-width:100%;filter:drop-shadow(0 18px 24px rgba(0,0,0,.55)) drop-shadow(0 0 40px rgba(77,132,240,.35))}
+@media (max-width:820px){.fig .cut{max-height:340px}}
+.fig .framed{width:min(330px,80vw);aspect-ratio:4/5;object-fit:cover;border-radius:180px 180px 16px 16px;border:5px solid var(--ink);box-shadow:0 0 0 6px var(--red),0 20px 40px rgba(0,0,0,.5);margin-bottom:26px}
+.fig .ph{width:min(320px,76vw);max-width:100%}
+.fig .wt{position:absolute;left:8%;bottom:34px;display:grid;justify-items:center;background:var(--red);color:#fff;border-radius:10px;padding:8px 12px 6px;transform:rotate(-6deg);box-shadow:0 8px 18px rgba(0,0,0,.4)}
+.fig .wt b{font:900 40px/0.9 var(--display)} .fig .wt span{font:800 11px var(--body);letter-spacing:.18em}
+.say{position:relative;align-self:center;padding-bottom:40px}
+@media (max-width:820px){.say{order:2;padding-bottom:28px}}
+.bubble{position:relative;background:var(--paper);color:var(--paper-ink);border-radius:26px;padding:24px 26px 20px;box-shadow:0 22px 50px rgba(0,0,0,.45)}
+.bubble::before{content:"";position:absolute;left:-26px;bottom:62px;border:16px solid transparent;border-right:30px solid var(--paper);border-left:0}
+@media (max-width:820px){.bubble::before{left:50%;top:-28px;bottom:auto;transform:translateX(-50%);border:16px solid transparent;border-bottom:30px solid var(--paper);border-top:0}}
+.bubble .hi{font:900 clamp(34px,5vw,46px)/.95 var(--display);text-transform:uppercase;color:var(--paper-ink);margin-bottom:10px}
+.bubble .hi em{font-style:normal;color:var(--red)}
+.bubble p{margin:0 0 12px;font-size:17px;line-height:1.55;max-width:58ch}
+.bubble .sig{font:700 34px/1 var(--hand);color:var(--blue);margin-top:2px;display:flex;align-items:center;gap:10px}
+.bubble .sig img{width:34px}
+.corner{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:center;margin-top:18px}
+.corner .who{display:flex;align-items:center}
+.corner .who i{width:30px;height:30px;border-radius:50%;margin-left:-8px;border:2px solid var(--night);display:grid;place-items:center;font:800 12px var(--body);font-style:normal;color:#fff}
+.corner .who i:first-child{margin-left:0}
+.corner span{color:var(--muted);font-size:15px}
+.corner span b{color:var(--ink)}
+.cta{display:inline-flex;align-items:center;gap:10px;background:var(--red);color:#fff;font:800 22px/1 var(--display);text-transform:uppercase;letter-spacing:.04em;padding:14px 22px 13px;border-radius:10px;text-decoration:none;box-shadow:0 6px 0 var(--red-deep)}
+.cta:hover{transform:translateY(-1px)} .cta:active{transform:translateY(3px);box-shadow:0 3px 0 var(--red-deep)}
+
+/* progress strip */
+.strip{background:var(--navy);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.strip .wrap{display:grid;grid-template-columns:auto repeat(3,minmax(0,1fr));gap:14px 26px;align-items:center;padding-block:16px}
+@media (max-width:700px){.strip .wrap{grid-template-columns:auto 1fr 1fr}.strip .st:last-child{grid-column:2 / span 2}}
+.singlet{width:74px}
+.singlet svg{width:100%;height:auto;display:block}
+.st b{display:block;font:900 38px/1 var(--display)}
+.st span{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.st.gold b{color:var(--gold)}
+
+/* roster */
+.roster{display:flex;gap:8px;overflow-x:auto;padding-block:16px 4px;scrollbar-width:thin}
+.tagbtn{flex:none;display:flex;align-items:center;gap:8px;border:1.5px solid var(--line-2);border-radius:999px;padding:4px 14px 4px 4px;background:var(--navy);font-weight:600;font-size:14.5px}
+.tagbtn .w{font:800 13px/1 var(--display);background:var(--navy-2);border-radius:999px;padding:6px 7px 5px;color:var(--sky);min-width:36px;text-align:center}
+.tagbtn[aria-pressed="true"]{background:var(--ink);color:var(--night);border-color:var(--ink)}
+.tagbtn[aria-pressed="true"] .w{background:var(--blue);color:#fff}
+
+/* price rules */
+.rules{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:20px}
+@media (max-width:700px){.rules{grid-template-columns:1fr}}
+.rule{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--navy);display:grid;grid-template-columns:auto 1fr;gap:2px 14px;align-items:center}
+.rule .p{grid-row:span 2;font:900 42px/1 var(--display)}
+.rule b{font:800 17px var(--display);letter-spacing:.08em;text-transform:uppercase}
+.rule span{font-size:13.5px;color:var(--muted);line-height:1.35}
+.rule.ev .p{color:var(--red-soft)} .rule.bk .p{color:var(--gold)}
+
+/* ---------- month calendars ---------- */
+.cal{padding-block:34px 6px}
+.sechead{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:end;justify-content:space-between;margin-bottom:14px}
+.sechead h2{font-size:clamp(38px,6vw,56px);text-transform:uppercase;font-weight:900}
+.sechead p{margin:0;color:var(--muted);max-width:52ch}
+.monthnav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.monthnav a{text-decoration:none;color:var(--ink);font:800 16px var(--display);letter-spacing:.08em;text-transform:uppercase;border:1.5px solid var(--line-2);border-radius:8px;padding:6px 12px 5px}
+.monthnav a:hover{border-color:var(--sky)}
+.monthnav a small{font:600 12px var(--body);color:var(--muted);letter-spacing:0;text-transform:none;margin-left:6px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted);margin:10px 0 4px}
+.legend i{display:inline-block;width:13px;height:13px;border-radius:4px;margin-right:6px;vertical-align:-2px}
+.month{padding-top:22px;scroll-margin-top:70px}
+.month-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.month-h h3{font-size:34px;font-weight:900;text-transform:uppercase;letter-spacing:.02em}
+.month-h h3 small{font-size:22px;color:var(--faint);margin-left:6px}
+.month-h span{color:var(--muted);font-size:14px}
+.grid{display:grid;grid-template-columns:30px repeat(7,minmax(0,1fr));gap:5px}
+@media (min-width:760px){.grid{grid-template-columns:38px repeat(7,minmax(0,1fr));gap:7px}}
+.dow{font:800 12px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--faint);text-align:center;padding-bottom:2px}
+.wk{display:grid;place-items:center}
+.wk button{width:26px;height:26px;border-radius:50%;border:1.5px dashed var(--line-2);color:var(--sky);font:800 15px/1 var(--body);display:grid;place-items:center}
+.wk button:hover{border-style:solid;border-color:var(--sky)}
+.wk button[aria-pressed="true"]{background:var(--gold);color:var(--night);border:0}
+.cell{position:relative;min-height:62px;border-radius:9px;padding:5px 6px;display:flex;flex-direction:column;gap:1px;text-align:left;min-width:0;overflow:hidden}
+@media (min-width:760px){.cell{min-height:96px;padding:7px 9px}}
+.cell .dn{font:800 17px/1 var(--display)}
+@media (min-width:760px){.cell .dn{font-size:20px}}
+.cell .lb{font-size:10.5px;line-height:1.15;font-weight:700;letter-spacing:.02em;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+@media (min-width:760px){.cell .lb{font-size:12.5px}}
+.cell .pr{margin-top:auto;font:800 13px/1 var(--display);letter-spacing:.04em}
+@media (min-width:760px){.cell .pr{font-size:16px}}
+.cell .nm{margin-top:auto;font-size:11px;font-weight:700;line-height:1.15;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;padding-right:14px}
+@media (min-width:760px){.cell .nm{font-size:13px;padding-right:20px}}
+.cell .ic{position:absolute;right:5px;bottom:5px;width:14px;height:11px}
+@media (min-width:760px){.cell .ic{width:20px;height:16px;right:7px;bottom:7px}}
+.cell .ini{display:none;margin-top:auto;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.24);place-items:center;font:800 10px/1 var(--body);color:#fff}
+@media (max-width:519px){
+  .grid{grid-template-columns:22px minmax(0,.6fr) repeat(5,minmax(0,1fr)) minmax(0,.6fr);gap:4px}
+  .cell{min-height:60px;padding:5px}
+  .cell .lb,.cell .nm{display:none}
+  .cell .ini{display:grid}
+  .cell .pr{font-size:14px}
+  .cell .ic{top:5px;right:4px;bottom:auto;width:13px;height:10px}
+  .cell.blank .dn{font-size:15px}
+  .wk button{width:22px;height:22px;font-size:13px}
+}
+.cell.blank{background:transparent;color:var(--faint);opacity:.5}
+.cell.blank .lb{font-weight:500;color:var(--faint)}
+.cell.out{visibility:hidden}
+.cell.open{background:var(--navy);border:1.5px solid var(--line-2)}
+.cell.open .lb{color:var(--muted)}
+.cell.open .pr{color:var(--sky)}
+.cell.open:hover{border-color:var(--sky)}
+.cell.ev{background:linear-gradient(165deg,#3a1230,#1a1236);border:1.5px solid #8d2440}
+.cell.ev .lb{color:#ffd9de}
+.cell.ev .pr{color:var(--red-soft)}
+.cell.ev:hover{border-color:var(--red-soft)}
+.cell.cont{background:repeating-linear-gradient(135deg,#2a1230 0 6px,#1a1236 6px 12px);border:1.5px solid #5b1a2e;color:#ffd9de}
+.cell.paid{background:var(--blue);border:1.5px solid var(--blue-hi);color:#fff}
+.cell.paid .lb{color:#d9e5ff}
+.cell.paid.evp{background:linear-gradient(165deg,var(--blue),#5a2a9c)}
+.cell.held{background:repeating-linear-gradient(135deg,var(--navy-2) 0 7px,var(--navy) 7px 14px);border:1.5px dashed var(--line-2)}
+.cell.held .nm{color:var(--muted);font-weight:600}
+.cell.sel{background:#3a3214;border:2px solid var(--gold);color:#fff}
+.cell.sel .pr{color:var(--gold)}
+.cell.sel::after{content:"";position:absolute;right:6px;top:6px;width:9px;height:9px;border-radius:50%;background:var(--gold)}
+.cell.off{background:transparent;border:1.5px dashed var(--line);opacity:.55}
+.cell.today{box-shadow:0 0 0 2px var(--night),0 0 0 4px var(--ink)}
+.cell.past:not(.paid):not(.sel){opacity:.72}
+.cell[disabled]{cursor:default}
+@media (prefers-reduced-motion:no-preference){.cell{transition:transform .12s,border-color .15s,background .15s}button.cell:active:not([disabled]){transform:scale(.95)}}
+
+/* backers, standings */
+.panel{padding-block:36px 4px}
+.backers{display:flex;flex-wrap:wrap;gap:8px}
+.backer{display:flex;align-items:center;gap:8px;background:var(--navy-2);border:1px solid var(--line-2);border-radius:999px;padding:5px 14px 5px 5px;font-weight:700}
+.backer img{width:26px}
+.empty{color:var(--muted);font-style:italic;margin:0}
+.teamtotal{display:flex;flex-wrap:wrap;gap:6px 26px;align-items:baseline;margin-bottom:14px}
+.teamtotal b{font:900 60px/1 var(--display);color:var(--gold)}
+.teamtotal span{color:var(--muted)}
+.board{display:grid;gap:6px}
+.rank{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:4px 12px;align-items:center;background:var(--navy);border:1px solid var(--line);border-radius:12px;padding:10px 14px;text-align:left;width:100%}
+.rank:hover{border-color:var(--line-2)}
+.rank .pos{grid-row:span 2;font:900 32px/1 var(--display);color:var(--faint);text-align:center}
+.rank.first .pos{color:var(--gold)}
+.rank .nm{font-weight:700;display:flex;gap:8px;align-items:baseline;min-width:0}
+.rank .nm span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rank .nm small{font:800 12px var(--display);color:var(--sky);letter-spacing:.06em}
+.rank .bar{height:7px;background:var(--navy-2);border-radius:4px;overflow:hidden}
+.rank .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--sky));border-radius:4px}
+.rank .amt{grid-row:1 / span 2;grid-column:3;text-align:right;font:900 26px/1 var(--display)}
+.rank .amt small{display:block;font:500 12px var(--body);color:var(--muted);margin-top:4px}
+.howto{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:760px){.howto{grid-template-columns:1fr}}
+.howto div{background:var(--navy);border:1px solid var(--line);border-radius:12px;padding:16px}
+.howto b{display:block;font:900 32px/1 var(--display);color:var(--red-soft)}
+.howto h3{font-size:21px;text-transform:uppercase;margin:8px 0 4px;font-weight:800}
+.howto p{margin:0;color:var(--muted);font-size:14.5px}
+.foot{color:var(--faint);font-size:13px;padding-block:30px 120px;display:flex;gap:14px;flex-wrap:wrap;justify-content:space-between;border-top:1px solid var(--line);margin-top:36px}
+.foot button{color:var(--muted);text-decoration:underline}
+
+/* ---------- her locker (private) ---------- */
+.locker{margin-top:22px;border:1px solid var(--line-2);border-radius:18px;background:linear-gradient(160deg,var(--navy-2),var(--navy) 60%);padding:20px;display:grid;gap:22px}
+.locker h2{font-size:40px;text-transform:uppercase;font-weight:900}
+.locker h3{font-size:24px;text-transform:uppercase;font-weight:800;margin-bottom:10px}
+.todaynote{display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:center;background:var(--night);border:1px solid var(--line);border-radius:14px;padding:18px}
+@media (max-width:560px){.todaynote{grid-template-columns:1fr;justify-items:start}}
+.todaynote .env{width:96px}
+.todaynote .env svg{width:100%;height:auto;overflow:visible}
+.todaynote q{display:block;font-size:21px;line-height:1.45;quotes:"\201C" "\201D";max-width:56ch}
+.todaynote .from{font:700 30px/1 var(--hand);color:var(--sky);margin-top:8px}
+.todaynote p{margin:6px 0 0;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.todaynote.open .flap{transform-box:fill-box;transform-origin:50% 0;animation:flap .9s .25s both}.todaynote.open .letter{animation:rise .8s .8s both}}
+@keyframes flap{to{transform:scaleY(-1)}}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.notes{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.notecard{background:var(--paper);color:var(--paper-ink);border-radius:4px 4px 14px 4px;padding:16px 16px 12px;transform:rotate(var(--r,0deg));box-shadow:0 8px 18px rgba(0,0,0,.35);display:grid;gap:6px}
+.notecard p{margin:0;font-size:16px;line-height:1.45}
+.notecard footer{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.notecard footer b{font:700 24px/1 var(--hand);color:var(--blue)}
+.notecard footer span{font-size:12px;color:#5b6582;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.sealed{display:flex;flex-wrap:wrap;gap:8px}
+.sealed span{display:flex;gap:8px;align-items:center;background:var(--night);border:1px dashed var(--line-2);border-radius:999px;padding:5px 12px 5px 8px;font-size:14px;font-weight:600}
+.sealed svg{width:22px;height:18px}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+@media (max-width:820px){.two{grid-template-columns:1fr}}
+.card{background:var(--night);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:10px;align-content:start}
+.card p{margin:0;color:var(--muted);font-size:14.5px}
+.share{background:var(--navy);border:1px solid var(--line-2);border-radius:10px;padding:12px;font-size:15px;white-space:pre-line;user-select:all}
+
+/* ---------- sheets & forms ---------- */
+.cart{position:fixed;left:0;right:0;bottom:0;z-index:15;background:var(--ink);color:var(--night);padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:0 -10px 30px rgba(0,0,0,.45)}
+.cart .wrap{display:flex;align-items:center;gap:6px 14px;padding-block:10px;flex-wrap:wrap}
+.cart .sum{font:900 30px/1 var(--display)}
+.cart .what{font-size:14px;font-weight:700;color:#3b4565;min-width:0}
+.cart .go{margin-left:auto;background:var(--red);color:#fff;font:800 20px/1 var(--display);text-transform:uppercase;letter-spacing:.04em;padding:12px 18px 11px;border-radius:9px}
+.cart .clr{color:#3b4565;text-decoration:underline;font-size:14px}
+.scrim{position:fixed;inset:0;z-index:30;background:rgba(2,5,14,.72);display:grid;place-items:end center}
+@media (min-width:700px){.scrim{place-items:center}}
+.sheet{width:min(560px,100%);max-height:92vh;overflow:auto;background:var(--navy);border:1px solid var(--line-2);border-radius:20px 20px 0 0;padding:22px max(20px,env(safe-area-inset-left,0px)) calc(22px + env(safe-area-inset-bottom,0px));display:grid;gap:14px}
+@media (min-width:700px){.sheet{border-radius:18px}}
+.sheet h3{font-size:36px;text-transform:uppercase;font-weight:900}
+.steps{display:flex;gap:6px}
+.steps i{flex:1;height:4px;border-radius:2px;background:var(--line)}
+.steps i.on{background:var(--red)}
+.field{display:grid;gap:6px;font-weight:700;font-size:14px}
+.field small{font-weight:500;color:var(--muted)}
+.inp{background:var(--night);border:1.5px solid var(--line-2);border-radius:9px;padding:10px 12px;font-weight:400;min-width:0;width:100%}
+.inp:focus{border-color:var(--sky);outline:none}
+textarea.inp{min-height:110px;resize:vertical;font-size:16px;line-height:1.45}
+.note-in{background:var(--paper);color:var(--paper-ink);border:0;border-radius:6px 6px 16px 6px;font-size:17px;min-height:130px;box-shadow:inset 0 -2px 0 rgba(0,0,0,.08)}
+.note-in::placeholder{color:#8d95ad}
+.note-in:focus{box-shadow:0 0 0 3px var(--gold)}
+.check{display:flex;gap:10px;align-items:center;font-weight:600}
+.check input{width:20px;height:20px;accent-color:var(--red);flex:none}
+.counter{text-align:right;font-size:12.5px;color:var(--muted)}
+.mod{font-size:13.5px;color:var(--muted);background:var(--night);border-radius:8px;padding:10px 12px;border-left:3px solid var(--gold);margin:0}
+.summary{display:grid;gap:4px;background:var(--night);border-radius:10px;padding:12px 14px;font-size:14px}
+.summary div{display:flex;justify-content:space-between;gap:10px}
+.summary .tot{border-top:1px solid var(--line);margin-top:4px;padding-top:8px;font:800 22px var(--display)}
+.btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.btn{border-radius:9px;padding:10px 16px;font-weight:700;border:1.5px solid var(--line-2)}
+.btn:hover{border-color:var(--sky)}
+.btn.pri{background:var(--red);border-color:var(--red);color:#fff}
+.btn.blu{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.mini{padding:6px 11px;font-size:13px}
+.btn:disabled{opacity:.5;cursor:default}
+.paybox{display:grid;gap:10px;justify-items:center;text-align:center;background:var(--night);border:1px dashed var(--line-2);border-radius:14px;padding:18px}
+.paybox .amt{font:900 58px/1 var(--display)}
+.paybtn{width:100%;max-width:340px;background:#3d95ce;color:#fff;border-radius:999px;padding:13px;font-weight:800;font-size:17px}
+.paybtn small{display:block;font-weight:500;font-size:12px;opacity:.9}
+.timer{font-size:13px;color:var(--muted)}
+.done{display:grid;justify-items:center;text-align:center;gap:10px}
+.done img{width:110px}
+.badge{font:800 18px var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--night);background:var(--gold);border-radius:6px;padding:6px 12px 5px}
+.err{color:var(--red-soft);font-size:14px;margin:0;min-height:0}
+.toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:40;background:var(--ink);color:var(--night);font-weight:700;padding:10px 16px;border-radius:9px;max-width:92vw;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+
+/* organizer */
+.org{margin-top:34px;border:1px solid var(--line-2);border-radius:18px;background:var(--navy);padding:20px}
+.org h2{font-size:40px;text-transform:uppercase;font-weight:900}
+.org h3{font-size:22px;text-transform:uppercase;font-weight:800;margin:22px 0 10px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.tabs button{padding:7px 14px;border-radius:999px;border:1.5px solid var(--line-2);font-weight:700;font-size:14px}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--night);border-color:var(--ink)}
+.q{display:grid;gap:8px;background:var(--night);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:8px}
+.q .meta{font-size:13px;color:var(--muted);display:flex;gap:6px 12px;flex-wrap:wrap;align-items:center}
+.q .meta b{color:var(--ink)}
+.st-pill{font:800 12px var(--display);letter-spacing:.1em;text-transform:uppercase;padding:3px 7px 2px;border-radius:4px;background:var(--navy-2)}
+.st-pill.paid{color:var(--ok)} .st-pill.pending{color:var(--gold)} .st-pill.conflict,.st-pill.void{color:var(--red-soft)}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px}
+th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font:800 13px var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.drop{border:2px dashed var(--line-2);border-radius:12px;padding:18px;text-align:center;color:var(--muted)}
+.drop.over{border-color:var(--gold);color:var(--ink)}
+
+/* ---------- polish pass ---------- */
+.poster .beam{position:absolute;top:-40px;left:27%;width:620px;height:115%;transform:translateX(-50%);z-index:-1;pointer-events:none;
+  background:radial-gradient(60% 75% at 50% 0%,rgba(170,198,255,.30),rgba(120,160,255,.08) 55%,transparent 75%);clip-path:polygon(38% 0,62% 0,100% 100%,0 100%);filter:blur(2px)}
+@media (max-width:820px){.poster .beam{left:50%;width:460px}}
+.poster::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.10;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.poster .bigname{color:transparent;background:linear-gradient(180deg,rgba(134,170,255,.26) 0%,rgba(134,170,255,.10) 55%,transparent 85%);-webkit-background-clip:text;background-clip:text;-webkit-text-stroke:1.5px rgba(160,190,255,.22)}
+.poster .edge{position:absolute;left:0;right:0;bottom:0;height:10px;background:linear-gradient(90deg,var(--red) 0 33%,var(--ink) 33% 36%,var(--blue) 36% 100%);z-index:0}
+.bubble{transform:rotate(-.6deg)}
+.bubble .tape{position:absolute;top:-14px;right:38px;width:96px;height:28px;background:rgba(255,255,255,.62);border-left:2px dashed rgba(0,0,0,.06);border-right:2px dashed rgba(0,0,0,.06);transform:rotate(4deg);box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.scribble{display:inline-flex;align-items:center;gap:6px;font:700 26px/1 var(--hand);color:var(--gold);transform:rotate(-4deg)}
+.scribble svg{width:46px;height:26px;flex:none}
+.corner .scribble{margin-left:4px}
+.sechead .scribble{font-size:28px}
+.cell .md{position:absolute;right:6px;top:6px;width:16px;height:20px;opacity:.9}
+@media (max-width:519px){.cell .md{display:none}}
+.cell.paid::before{content:"";position:absolute;inset:0;background:linear-gradient(125deg,rgba(255,255,255,.18) 0 22%,transparent 40%);pointer-events:none}
+.cell.sel.pop{animation:pop .32s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{0%{transform:scale(.86)}100%{transform:scale(1)}}
+.cell.today::after{content:"TODAY";position:absolute;left:50%;bottom:-1px;transform:translate(-50%,50%);font:800 9px/1 var(--body);letter-spacing:.14em;background:var(--ink);color:var(--night);padding:3px 6px;border-radius:4px;z-index:1}
+.cell.today{overflow:visible}
+.month-h h3{position:relative}
+.notecard{position:relative;padding-top:22px}
+.notecard::before{content:"";position:absolute;top:-10px;left:50%;width:84px;height:24px;transform:translateX(-50%) rotate(-3deg);background:rgba(134,170,255,.55);box-shadow:0 2px 4px rgba(0,0,0,.2)}
+.notecard:nth-child(3n+2)::before{background:rgba(227,38,60,.5);transform:translateX(-50%) rotate(4deg)}
+/* podium */
+.podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:end;margin-bottom:12px}
+.pod{display:grid;justify-items:center;gap:6px;text-align:center;min-width:0;background:none;border:0;color:inherit}
+.pod .av{width:64px;height:64px;border-radius:50%;background:var(--navy-2) center/cover no-repeat;border:3px solid var(--ink);display:grid;place-items:center;font:900 24px var(--display)}
+.pod .nm{font-weight:800;font-size:15px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pod .amt{font:900 26px/1 var(--display);color:var(--gold)}
+.pod .blk{width:100%;border-radius:10px 10px 0 0;display:grid;place-items:center;font:900 46px/1 var(--display);color:rgba(255,255,255,.9);
+  background:linear-gradient(180deg,var(--navy-3),var(--navy));border:1px solid var(--line-2);border-bottom:0}
+.pod.p1 .blk{height:130px;background:linear-gradient(180deg,#3a5fbf,var(--navy-2))} .pod.p1 .av{width:80px;height:80px;border-color:var(--gold);box-shadow:0 0 0 4px rgba(255,207,92,.25)}
+.pod.p2 .blk{height:96px} .pod.p3 .blk{height:72px}
+/* one-time entrance */
+@media (prefers-reduced-motion:no-preference){
+  .intro .poster .bigname{animation:slideIn 1s cubic-bezier(.2,.8,.2,1) both}
+  .intro .poster .beam{animation:fadeIn 1.4s .1s ease-out both}
+  .intro .poster .fig{animation:rise .8s .15s cubic-bezier(.2,.8,.2,1) both}
+  .intro .poster .bubble{animation:bubble .7s .45s cubic-bezier(.3,1.4,.5,1) both}
+  .intro .poster .corner{animation:fadeIn .6s .9s both}
+  .intro .singlet rect{animation:fill 1.6s .5s cubic-bezier(.2,.8,.2,1) both}
+}
+@keyframes slideIn{from{opacity:0;transform:translateX(-8%)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes bubble{from{opacity:0;transform:scale(.85) rotate(-3deg)}to{opacity:1;transform:rotate(-.6deg)}}
+@keyframes fill{from{transform:translateY(100%)}to{transform:none}}
+</style>
+
+<div id="app"></div>
+
+<script>
+(function(){
+"use strict";
+/* ======================================================================
+   Season (demo fallback; the live site reads config/season from Firestore)
+   ====================================================================== */
+const EVENTS=[["2026-12-08","Season-opening scrimmage","Merrill (home)",0,null,"Scrimmage"],["2026-12-11","Waunakee","Away",0,null,"@ Waunakee"],["2026-12-15","GNC/WVC multi-school","Antigo or SPASH",0,null,"GNC/WVC"],["2026-12-18","Added event (Dec 18 or 19)","Date and site to be announced",0,null,"TBA event"],["2026-12-22","Hodag Dome Tournament","Rhinelander",0,null,"Hodag Dome"],["2026-12-30","Waukesha West","Overnight trip",0,null,"@ Waukesha W."],["2027-01-08","Wausau West 16-team duals","UW-Stevens Point",0,null,"UWSP Duals"],["2027-01-09","Bluejay Challenge","Merrill (home)",0,null,"Bluejay Challenge"],["2027-01-12","GNC/WVC multi-school","Lakeland or Wausau West",0,null,"GNC/WVC"],["2027-01-14","Boys & girls duals vs Tomahawk","Merrill (home)",0,null,"vs Tomahawk"],["2027-01-16","Wausau West Individual Tournament","Wausau",0,null,"Wausau West Ind."],["2027-01-19","Merrill Finale Tournament","Merrill (home)",0,null,"Finale"],["2027-01-21","Home dual or multi-school","Merrill (home)",0,null,"Home meet"],["2027-01-26","GNC/WVC Conference Tournament","Tomahawk",0,null,"Conference"],["2027-01-30","Eau Claire North Tournament","Eau Claire",0,null,"EC North"],["2027-02-05","WIAA Regional","Merrill (home)",1,null,"Regional"],["2027-02-12","WIAA Individual Sectional","Antigo",1,null,"Sectional"],["2027-02-19","WIAA Team Sectional","Site to be announced",1,null,"Team Sectional"],["2027-02-25","WIAA Individual State","Kohl Center, Madison",1,"2027-02-27","State"],["2027-03-05","WIAA Team State","La Crosse Center",1,"2027-03-06","Team State"]];
+const BREAKS={"2026-11-26":"Thanksgiving","2026-11-27":"Thanksgiving break","2026-12-24":"Christmas Eve","2026-12-25":"Christmas","2026-12-29":"Travel to Waukesha","2026-12-31":"New Year's Eve","2027-01-01":"New Year's Day"};
+function seasonDays(){const ev={};EVENTS.forEach(([key,name,where,post,end,label])=>ev[key]={key,kind:"event",name,where,post:!!post,end,label});
+  const out=[];const d=new Date("2026-11-16T00:00:00Z"),stop=new Date("2027-03-06T00:00:00Z");
+  for(;d<=stop;d.setUTCDate(d.getUTCDate()+1)){const key=d.toISOString().slice(0,10),wd=d.getUTCDay();
+    if(ev[key]){out.push(ev[key]);continue}if(key>"2027-02-04"||wd===0||wd===6||BREAKS[key])continue;
+    out.push({key,kind:"practice",name:"Practice",where:"",post:false,end:null,label:"Practice"})}return out}
+const DEFAULT_ASK=first=>`Hi, it's ${first}! This season I'm putting in the work: in the practice room, on the mat, and in the classroom. Wrestling is tough, and some days it's just me out there.\n\nWould you sponsor one of my days? A practice is {practice} and a meet is {meet}. When you do, leave me a note. I'll open it the morning of your day, and it'll remind me who's in my corner.\n\nThank you for helping me become the best version of me.`;
+
+/* ======================================================================
+   Helpers
+   ====================================================================== */
+const h=(tag,a,...kids)=>{const n=document.createElement(tag);if(a)for(const k in a){const v=a[k];if(v==null||v===false)continue;
+  if(k.startsWith("on"))n.addEventListener(k.slice(2),v);else if(k==="class")n.className=v;else if(k==="style")n.style.cssText=v;else if(k==="value")n.value=v;else n.setAttribute(k,v===true?"":v)}
+  for(const c of kids.flat()){if(c==null||c===false)continue;n.append(c.nodeType?c:document.createTextNode(String(c)))}return n};
+const frag=s=>{const t=document.createElement("template");t.innerHTML=s.trim();return t.content.firstChild};
+const P=s=>new Date(s+"T00:00:00Z");
+const F=(s,o)=>P(s).toLocaleDateString("en-US",Object.assign({timeZone:"UTC"},o));
+const short=s=>F(s,{month:"short",day:"numeric"}), longDay=s=>F(s,{weekday:"long",month:"long",day:"numeric"});
+const addDays=(k,n)=>{const d=P(k);d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)};
+const money=c=>"$"+(c/100).toLocaleString("en-US",{minimumFractionDigits:c%100?2:0,maximumFractionDigits:2});
+const centralToday=()=>new Intl.DateTimeFormat("en-CA",{timeZone:"America/Chicago",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+const firstName=n=>String(n||"").replace(/\s*\(.*\)\s*/,"").split(/\s+/)[0]||"her";
+const initials=n=>String(n||"?").split(/\s+/).filter(Boolean).map(x=>x[0]).join("").slice(0,2).toUpperCase();
+const errText=e=>(e&&e.message||"Something went wrong. Try again.").replace(/^Firebase(Error)?:\s*/,"");
+function toast(msg){document.querySelectorAll(".toast").forEach(t=>t.remove());const t=h("div",{class:"toast",role:"status"},msg);document.body.append(t);setTimeout(()=>t.remove(),3800)}
+async function copy(text,el){try{await navigator.clipboard.writeText(text);toast("Copied")}catch(e){if(el){const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r)}toast("Selected. Copy it from here.")}}
+const DOT_COLORS=["#2d68db","#e3263c","#7b5cd6","#1e9e7a","#d9822b","#3b8fd9"];
+
+const ENVELOPE=open=>`<svg viewBox="0 0 96 72" aria-hidden="true"><rect x="3" y="14" width="90" height="55" rx="6" fill="#fbf7ef"/>${open?`<g class="letter"><rect x="14" y="2" width="68" height="44" rx="3" fill="#fff"/><path d="M24 14h48M24 22h40M24 30h44" stroke="#c9cfe0" stroke-width="3" stroke-linecap="round"/></g>`:""}<path d="M3 20 48 46 93 20" fill="none" stroke="#d8cdb6" stroke-width="2.5"/><path class="flap" d="M3 20 Q3 14 9 14 H87 Q93 14 93 20 L48 46 Z" fill="#efe6d3"/><circle cx="48" cy="44" r="9" fill="#e3263c"/><path d="M43.5 44h9M48 39.5v9" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>`;
+const MINI_ENV=`<svg class="ic" viewBox="0 0 20 16" aria-hidden="true"><rect x="1" y="2" width="18" height="13" rx="2.5" fill="#fbf7ef"/><path d="M1.5 4 10 10 18.5 4" fill="none" stroke="#e3263c" stroke-width="1.8"/></svg>`;
+const MEDAL=`<svg class="md" viewBox="0 0 16 20" aria-hidden="true"><path d="M4 0h3l2 6H6zM9 0h3L10 6H7z" fill="#e3263c"/><circle cx="8" cy="13" r="6" fill="#ffcf5c"/><circle cx="8" cy="13" r="3.4" fill="none" stroke="#b8891f" stroke-width="1.2"/></svg>`;
+const ARROW_DOWN=`<svg viewBox="0 0 46 26" aria-hidden="true"><path d="M2 6 C16 2 30 4 38 18" fill="none" stroke="#ffcf5c" stroke-width="2.5" stroke-linecap="round"/><path d="M31 16 L38 20 L40 12" fill="none" stroke="#ffcf5c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const SMALL_ENV=`<svg viewBox="0 0 20 16" aria-hidden="true"><rect x="1" y="2" width="18" height="13" rx="2.5" fill="#fbf7ef"/><path d="M1.5 4 10 10 18.5 4" fill="none" stroke="#e3263c" stroke-width="1.8"/></svg>`;
+
+function matSVG(){return frag(`<svg class="mat" viewBox="0 0 1000 1000" aria-hidden="true">
+  <circle cx="500" cy="500" r="480" fill="none" stroke="#e3263c" stroke-opacity=".45" stroke-width="30"/>
+  <circle cx="500" cy="500" r="450" fill="#132a63" fill-opacity=".55"/>
+  <circle cx="500" cy="500" r="370" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width="7"/>
+  <circle cx="500" cy="500" r="64" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width="7"/>
+  <rect x="468" y="482" width="14" height="46" rx="3" fill="#e3263c" fill-opacity=".7"/>
+  <rect x="518" y="472" width="14" height="46" rx="3" fill="#4d84f0" fill-opacity=".85"/>
+</svg>`)}
+
+function placeholderFigure(){return frag(`<svg class="ph" viewBox="0 0 320 420" role="img" aria-label="Photo placeholder">
+  <defs><linearGradient id="phg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22397a"/><stop offset="1" stop-color="#132353"/></linearGradient></defs>
+  <path d="M196 70 C232 66 252 96 246 126 C262 150 258 186 238 196" fill="none" stroke="url(#phg)" stroke-width="26" stroke-linecap="round"/>
+  <circle cx="160" cy="112" r="56" fill="url(#phg)"/>
+  <path d="M60 420 C60 300 92 214 160 210 C228 214 260 300 260 420 Z" fill="url(#phg)"/>
+  <path d="M120 222 L132 300 L160 330 L188 300 L200 222" fill="none" stroke="#e3263c" stroke-width="10" stroke-linejoin="round" opacity=".8"/>
+  <path d="M160 26 a86 86 0 0 1 0 172 a86 86 0 0 1 0 -172" fill="none" stroke="#86aaff" stroke-opacity=".5" stroke-width="2.5" stroke-dasharray="7 9"/>
+  <text x="160" y="400" text-anchor="middle" font-family="Figtree,system-ui,sans-serif" font-weight="700" font-size="17" fill="#9eabd2">Her photo goes here</text>
+</svg>`)}
+
+function singletSVG(pct){const body="M62 10 H90 C95 44 125 44 130 10 H158 C160 62 167 98 177 134 C187 174 193 216 197 264 C171 284 141 282 125 256 L110 232 L95 256 C79 282 49 284 23 264 C27 216 33 174 43 134 C53 98 60 62 62 10 Z";
+  const y=292-Math.round(282*pct);const id="sc"+Math.random().toString(36).slice(2,7);
+  return frag(`<svg viewBox="0 0 220 300" role="img" aria-label="Singlet ${Math.round(pct*100)} percent full"><defs><clipPath id="${id}"><path d="${body}"/></clipPath></defs>
+   <path d="${body}" fill="#121f47"/><g clip-path="url(#${id})"><rect x="0" y="${y}" width="220" height="${300-y}" fill="#2d68db"/>
+   <path d="M43 134 C33 174 27 216 23 264 L42 272 C46 220 52 176 60 136 Z" fill="#e3263c"/><path d="M177 134 C187 174 193 216 197 264 L178 272 C174 220 168 176 160 136 Z" fill="#e3263c"/></g>
+   <path d="${body}" fill="none" stroke="#f3f6ff" stroke-width="7" stroke-linejoin="round"/>
+   <text x="110" y="190" text-anchor="middle" font-family="Big Shoulders Display,Impact,sans-serif" font-weight="900" font-size="64" fill="#fff">${Math.round(pct*100)}%</text></svg>`)}
+
+/* ======================================================================
+   Backends: same interface. Demo = in memory. Live = Firebase.
+   ====================================================================== */
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function makeDemoBackend(){
+  const TODAY="2026-12-14";
+  const season={days:seasonDays(),breaks:BREAKS,offDays:[],practicePriceCents:500,eventMultiplier:5,rewardName:"Bluejay Backer",
+    rewardText:"Sponsor 5 practices or 1 meet for the same wrestler and you're a Bluejay Backer: a handwritten thank-you from her and your name on the Backers wall at the Finale on Jan 19.",
+    payNote:"Every dollar goes to the Merrill Wrestling booster club for the girls' team."};
+  const W=[["d1","Addison",100],["d2","Brynn",114],["d3","Kenzie",126],["d4","Maya",138],["d5","Reagan",152],["d6","Tessa",185]].map(([id,n,wt])=>({id,name:n+" (sample)",weight:String(wt),photoUrl:"",photoCutout:false,askText:DEFAULT_ASK(n),active:true,raisedCents:0,daysPaid:0,sponsorCount:0}));
+  const emails={d1:"addison.s@example.org",d2:"brynn.k@example.org",d3:"kenzie.r@example.org",d4:"maya.t@example.org",d5:"reagan.l@example.org",d6:"tessa.w@example.org"};
+  const claims={},orders={},messages={};let seq=1;const L=new Set();const emit=()=>L.forEach(f=>f());
+  const dayMap=Object.fromEntries(season.days.map(d=>[d.key,d]));
+  const price=k=>dayMap[k].kind==="event"?season.practicePriceCents*5:season.practicePriceCents;
+  const taken=c=>c&&(c.status==="paid"||(c.status==="held"&&c.holdExpires>Date.now()));
+  function place(inp,method){const keys=[...new Set(inp.dayKeys)].sort();const tk=keys.filter(k=>taken(claims[inp.wrestlerId+"__"+k]));
+    if(tk.length){const e=new Error("Someone just took one of those days.");e.details={taken:tk};throw e}
+    const id="o"+(seq++),amount=keys.reduce((s,k)=>s+price(k),0);
+    orders[id]={id,wrestlerId:inp.wrestlerId,dayKeys:keys,amountCents:amount,donorName:inp.donorName,anon:!!inp.anon,contact:inp.contact||"",message:inp.message||"",revealDay:keys.includes(inp.revealDay)?inp.revealDay:keys[0],status:"pending",method,createdAt:Date.now()-seq*60000};
+    keys.forEach(k=>claims[inp.wrestlerId+"__"+k]={wrestlerId:inp.wrestlerId,dayKey:k,status:"held",orderId:id,displayName:inp.anon?"Anonymous":inp.donorName,hasNote:false,holdExpires:Date.now()+15*60000});
+    return{orderId:id,amountCents:amount,holdExpires:Date.now()+15*60000}}
+  function moderate(id,ok,text){const m=messages[id];m.status=ok?"approved":"rejected";if(text!=null)m.text=text;m.released=ok&&m.revealDay<=TODAY;
+    const c=claims[m.wrestlerId+"__"+m.revealDay];if(c&&c.orderId===id)c.hasNote=ok}
+  function pay(id,provider,approve){const o=orders[id];if(!o||o.status!=="pending")return{status:o?o.status:"missing"};o.status="paid";o.payment={provider};
+    o.dayKeys.forEach(k=>claims[o.wrestlerId+"__"+k]={wrestlerId:o.wrestlerId,dayKey:k,status:"paid",orderId:id,displayName:o.anon?"Anonymous":o.donorName,hasNote:!!o.message&&k===o.revealDay});
+    const w=W.find(x=>x.id===o.wrestlerId);w.raisedCents+=o.amountCents;w.daysPaid+=o.dayKeys.length;w.sponsorCount++;
+    if(o.message){messages[id]={id,wrestlerId:o.wrestlerId,text:o.message,fromName:o.anon?"Someone in your corner":o.donorName,revealDay:o.revealDay,status:"pending",released:false};if(approve)moderate(id,true)}
+    return{status:"paid"}}
+  const seed=[["d3",["2026-11-16","2026-11-17","2026-11-18","2026-11-19","2026-11-20"],"Grandma Jo","First week! You were born tough, sweetheart. I'll be in the stands.","2026-11-16"],
+    ["d3",["2026-12-08"],"The Lindqvist family","Scrimmage day. Have fun out there and trust your training.","2026-12-08"],
+    ["d3",["2026-12-11"],"The Ostrowskis","Waunakee won't know what hit them. So proud of you!","2026-12-11"],
+    ["d3",["2026-12-14"],"Uncle Mike","Monday practices are where state qualifiers are made. Every rep counts. Proud of you, kiddo.","2026-12-14"],
+    ["d3",["2026-12-22"],"Aunt Carla","Hodag Dome! Wear the pink tape for good luck.","2026-12-22"],
+    ["d3",["2027-01-19","2026-12-01","2026-12-02"],"Anonymous","Keep going. Someone is watching you work and it's inspiring.","2027-01-19"],
+    ["d3",["2026-12-03","2026-12-04"],"Uncle Tony","",null],["d3",["2027-01-09"],"The Novak family","Bluejay Challenge champ? Go get it.","2027-01-09"],
+    ["d1",["2026-11-30","2026-12-01","2026-12-02","2026-12-03","2026-12-04","2026-12-08"],"Mom & Dad","We love watching you wrestle!","2026-12-08"],
+    ["d2",["2026-12-15","2027-01-09","2026-12-16"],"Uncle Tony","You've got this!","2027-01-09"],["d4",["2026-11-16","2026-11-17"],"The Pietrowskis","",null],
+    ["d5",["2026-12-30"],"Grandma & Grandpa B","Safe travels to Waukesha!","2026-12-30"],["d6",["2026-12-07","2026-12-09","2026-12-10"],"Coach Pat's neighbor","",null],
+    ["d1",["2027-01-30"],"Dave and Lisa","",null],["d4",["2027-02-05"],"Room 214","Go Maya!","2027-02-05"]];
+  seed.forEach(([w,keys,n,msg,rev])=>pay(place({wrestlerId:w,dayKeys:keys,donorName:n,anon:n==="Anonymous",message:msg,revealDay:rev||keys[0]},"sample").orderId,"sample",true));
+  pay(place({wrestlerId:"d3",dayKeys:["2026-12-17"],donorName:"Pat Jansky",message:"Good luck this week. Can't wait to watch you wrestle!",revealDay:"2026-12-17"},"online").orderId,"mock",false);
+  place({wrestlerId:"d2",dayKeys:["2026-12-21"],donorName:"Sam (waiting on Venmo)",message:"",revealDay:"2026-12-21"},"online");
+  let auth={signedIn:false,admin:false,wrestlerId:null,email:""};const AL=new Set();const pushAuth=()=>AL.forEach(f=>f(auth));
+  return{mode:"demo",today:()=>TODAY,
+    watchSeason(cb){const f=()=>cb(season);L.add(f);f();return()=>L.delete(f)},
+    watchWrestlers(cb){const f=()=>cb(W.map(x=>({...x})));L.add(f);f();return()=>L.delete(f)},
+    watchTeam(cb){const f=()=>cb(W.reduce((a,w)=>({raisedCents:a.raisedCents+w.raisedCents,daysPaid:a.daysPaid+w.daysPaid}),{raisedCents:0,daysPaid:0}));L.add(f);f();return()=>L.delete(f)},
+    watchClaims(wid,cb){const f=()=>{const m={};Object.values(claims).forEach(c=>{if(c.wrestlerId===wid)m[c.dayKey]={...c}});cb(m)};L.add(f);f();return()=>L.delete(f)},
+    watchMyNotes(wid,cb){const f=()=>cb(Object.values(messages).filter(m=>m.wrestlerId===wid&&m.released).sort((a,b)=>b.revealDay.localeCompare(a.revealDay)).map(m=>({...m})));L.add(f);f();return()=>L.delete(f)},
+    async paymentMode(){return"mock"},
+    async createOrder(inp){await wait(450);const r=place(inp,"online");emit();return r},
+    async mockPay(id){await wait(1000);const r=pay(id,"mock",false);emit();return r},
+    onAuth(cb){AL.add(cb);cb(auth)},
+    demoAs(view){auth=view==="admin"?{signedIn:true,admin:true,wrestlerId:null,email:"coach@example.org"}:view==="athlete"?{signedIn:true,admin:false,wrestlerId:"d3",email:emails.d3}:{signedIn:false,admin:false,wrestlerId:null,email:""};pushAuth()},
+    async sendSignInLink(){await wait(400)}, async signInGoogle(){this.demoAs("athlete")}, async signOut(){this.demoAs("public")}, async finishEmailLink(){return false},
+    async updateMyProfile(p){Object.assign(W.find(x=>x.id===auth.wrestlerId),p);emit()},
+    async uploadPhoto(wid,blob){return URL.createObjectURL(blob)},
+    watchAdmin(cb){const f=()=>cb({pending:Object.values(messages).filter(m=>m.status==="pending").map(m=>({...m})),orders:Object.values(orders).sort((a,b)=>b.createdAt-a.createdAt).map(o=>({...o})),emails:{...emails}});L.add(f);f();return()=>L.delete(f)},
+    async setup(){toast("The sample season is already set up")},
+    async saveSettings(s){Object.assign(season,s);emit()},
+    async importRoster(rows){let added=0,updated=0;const skipped=[];rows.forEach(r=>{const em=String(r.email||"").toLowerCase();if(!r.name||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){skipped.push(r.email||r.name);return}
+      const ex=Object.keys(emails).find(k=>emails[k]===em);if(ex){Object.assign(W.find(w=>w.id===ex),{name:r.name,weight:r.weight||W.find(w=>w.id===ex).weight});updated++}
+      else{const id="n"+(seq++);W.push({id,name:r.name,weight:r.weight||"",photoUrl:"",photoCutout:false,askText:DEFAULT_ASK(firstName(r.name)),active:true,raisedCents:0,daysPaid:0,sponsorCount:0});emails[id]=em;added++}});emit();return{added,updated,skipped}},
+    async saveWrestler(p){Object.assign(W.find(x=>x.id===p.id),p);emit()},
+    async setOffDay(k,off){if(off&&Object.values(claims).some(c=>c.dayKey===k&&taken(c)))throw new Error("Someone already sponsored this day. Void that sponsorship first.");season.offDays=off?[...season.offDays,k]:season.offDays.filter(x=>x!==k);emit()},
+    async recordPayment(inp){const r=place(inp,inp.method);pay(r.orderId,inp.method,false);emit();return r},
+    async confirmOrder(id){pay(id,"manual",false);emit()},
+    async voidOrder(id){const o=orders[id];if(o.status==="paid"){const w=W.find(x=>x.id===o.wrestlerId);w.raisedCents-=o.amountCents;w.daysPaid-=o.dayKeys.length;w.sponsorCount--}
+      o.dayKeys.forEach(k=>{const c=claims[o.wrestlerId+"__"+k];if(c&&c.orderId===id)delete claims[o.wrestlerId+"__"+k]});if(messages[id]){messages[id].status="rejected";messages[id].released=false}o.status="void";emit()},
+    async moderate(id,ok,text){moderate(id,ok,text);emit()}};
+}
+
+async function makeLiveBackend(){
+  // Firebase Hosting serves the project's web config at this path. Anywhere else (like a claude.ai preview) it fails and the page runs the demo.
+  const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),2500);
+  const res=await fetch("/__/firebase/init.json",{signal:ctl.signal});clearTimeout(t);if(!res.ok)throw new Error("no config");
+  const config=await res.json();const B="https://www.gstatic.com/firebasejs/10.12.2/";
+  const [A,FS,FN,AU,ST]=await Promise.all(["firebase-app.js","firebase-firestore.js","firebase-functions.js","firebase-auth.js","firebase-storage.js"].map(f=>import(B+f)));
+  const app=A.initializeApp(config),db=FS.getFirestore(app),fns=FN.getFunctions(app),auth=AU.getAuth(app),storage=ST.getStorage(app);
+  if(["localhost","127.0.0.1"].includes(location.hostname)){FS.connectFirestoreEmulator(db,"127.0.0.1",8080);FN.connectFunctionsEmulator(fns,"127.0.0.1",5001);AU.connectAuthEmulator(auth,"http://127.0.0.1:9099",{disableWarnings:true});ST.connectStorageEmulator(storage,"127.0.0.1",9199)}
+  const call=async(name,data)=>{try{return(await FN.httpsCallable(fns,name)(data)).data}catch(e){const err=new Error(errText(e));err.details=e.details;err.code=e.code;throw err}};
+  const ms=v=>v&&v.toMillis?v.toMillis():v;
+  const snapErr=e=>{console.error(e);toast("Live updates paused: "+errText(e))};
+  const EMAIL_KEY="bb-signin-email";
+  return{mode:"live",today:centralToday,
+    watchSeason:cb=>FS.onSnapshot(FS.doc(db,"config/season"),s=>cb(s.exists()?s.data():null),snapErr),
+    watchWrestlers:cb=>FS.onSnapshot(FS.collection(db,"wrestlers"),q=>cb(q.docs.map(d=>({id:d.id,raisedCents:0,daysPaid:0,sponsorCount:0,...d.data()}))),snapErr),
+    watchTeam:cb=>FS.onSnapshot(FS.doc(db,"team/totals"),s=>cb(s.data()||{raisedCents:0,daysPaid:0}),snapErr),
+    watchClaims:(wid,cb)=>FS.onSnapshot(FS.query(FS.collection(db,"claims"),FS.where("wrestlerId","==",wid)),q=>{const m={};q.docs.forEach(d=>{const c=d.data();m[c.dayKey]={...c,holdExpires:ms(c.holdExpires)}});cb(m)},snapErr),
+    watchMyNotes:(wid,cb)=>FS.onSnapshot(FS.query(FS.collection(db,"messages"),FS.where("wrestlerId","==",wid),FS.where("released","==",true),FS.orderBy("revealAt","desc"),FS.limit(120)),q=>cb(q.docs.map(d=>({id:d.id,...d.data()}))),snapErr),
+    async paymentMode(){try{return(await call("paymentMode",{})).mode}catch(e){return"mock"}},
+    createOrder:inp=>call("createOrder",inp), mockPay:orderId=>call("mockPay",{orderId}),
+    onAuth(cb){AU.onAuthStateChanged(auth,async u=>{if(!u)return cb({signedIn:false,admin:false,wrestlerId:null,email:""});
+      let tok=await u.getIdTokenResult();
+      if(!tok.claims.admin&&!tok.claims.wrestlerId){try{await call("claimRoles",{});tok=await u.getIdTokenResult(true)}catch(e){toast(errText(e))}}
+      cb({signedIn:true,admin:tok.claims.admin===true,wrestlerId:tok.claims.wrestlerId||null,email:u.email})})},
+    async sendSignInLink(email){await AU.sendSignInLinkToEmail(auth,email,{url:location.origin+"/?signin=1",handleCodeInApp:true});try{localStorage.setItem(EMAIL_KEY,email)}catch(e){}},
+    async finishEmailLink(askEmail){if(!AU.isSignInWithEmailLink(auth,location.href))return false;let email="";try{email=localStorage.getItem(EMAIL_KEY)||""}catch(e){}
+      if(!email)email=await askEmail();if(!email)return false;await AU.signInWithEmailLink(auth,email,location.href);try{localStorage.removeItem(EMAIL_KEY)}catch(e){}history.replaceState(null,"",location.pathname+location.hash);return true},
+    async signInGoogle(){await AU.signInWithPopup(auth,new AU.GoogleAuthProvider())},
+    async signOut(){await AU.signOut(auth)},
+    updateMyProfile:p=>call("athleteUpdateProfile",p),
+    async uploadPhoto(wid,blob,type){const r=ST.ref(storage,`wrestlers/${wid}/${Date.now()}.${type==="image/png"?"png":"jpg"}`);await ST.uploadBytes(r,blob,{contentType:type});return ST.getDownloadURL(r)},
+    watchAdmin(cb){let pend=[],ords=[],emails={};const push=()=>cb({pending:pend,orders:ords,emails});
+      const u=[FS.onSnapshot(FS.query(FS.collection(db,"messages"),FS.where("status","==","pending")),q=>{pend=q.docs.map(d=>({id:d.id,...d.data()}));push()},snapErr),
+        FS.onSnapshot(FS.query(FS.collection(db,"orders"),FS.orderBy("createdAt","desc"),FS.limit(300)),q=>{ords=q.docs.map(d=>({id:d.id,...d.data(),createdAt:ms(d.data().createdAt)}));push()},snapErr),
+        FS.onSnapshot(FS.collection(db,"wrestlerPrivate"),q=>{emails={};q.docs.forEach(d=>emails[d.id]=d.data().email);push()},snapErr)];
+      return()=>u.forEach(f=>f())},
+    setup:()=>call("adminSetup",{}), saveSettings:s=>call("adminSettings",s), importRoster:rows=>call("adminImportRoster",{rows}),
+    saveWrestler:p=>call("adminSaveWrestler",p), setOffDay:(dayKey,off)=>call("adminSetOffDay",{dayKey,off}),
+    recordPayment:inp=>call("adminRecordPayment",inp), confirmOrder:orderId=>call("adminConfirmOrder",{orderId}),
+    voidOrder:orderId=>call("adminVoidOrder",{orderId}), moderate:(messageId,approve,text)=>call("adminModerate",{messageId,approve,text})};
+}
+
+/* ======================================================================
+   State
+   ====================================================================== */
+const S={season:null,loaded:false,wrestlers:[],team:{raisedCents:0,daysPaid:0},claims:{},notes:[],cur:null,sel:new Set(),
+  auth:{signedIn:false,admin:false,wrestlerId:null,email:""},admin:{pending:[],orders:[],emails:{}},orgTab:"notes",dayTool:false,
+  modal:null,payMode:"mock",demoView:"public",csv:null};
+let api,unClaims=()=>{},unNotes=()=>{},unAdmin=null;
+const app=document.getElementById("app");
+const roster=()=>S.wrestlers.filter(w=>w.active!==false).sort((a,b)=>(+a.weight||999)-(+b.weight||999)||a.name.localeCompare(b.name));
+const curW=()=>S.wrestlers.find(w=>w.id===S.cur);
+const days=()=>S.season?S.season.days:[];
+const dayMap=()=>Object.fromEntries(days().map(d=>[d.key,d]));
+const priceOf=d=>d.kind==="event"?S.season.practicePriceCents*S.season.eventMultiplier:S.season.practicePriceCents;
+const isOff=k=>!!S.season&&(S.season.offDays||[]).includes(k);
+const claimOf=k=>{const c=S.claims[k];if(!c)return null;if(c.status==="paid")return c;if(c.status==="held"&&c.holdExpires>Date.now())return c;return null};
+const isMine=()=>S.auth.wrestlerId&&S.auth.wrestlerId===S.cur;
+const fillAsk=(t,w)=>String(t||DEFAULT_ASK(firstName(w.name))).replaceAll("{practice}",money(S.season.practicePriceCents)).replaceAll("{meet}",money(S.season.practicePriceCents*S.season.eventMultiplier)).replaceAll("{name}",firstName(w.name));
+
+function select(id){if(!id||S.cur===id)return;S.cur=id;S.sel.clear();S.claims={};S.notes=[];unClaims();unNotes();
+  unClaims=api.watchClaims(id,m=>{S.claims=m;[...S.sel].forEach(k=>{if(claimOf(k))S.sel.delete(k)});render()});
+  if(S.auth.wrestlerId===id)unNotes=api.watchMyNotes(id,n=>{S.notes=n;render()});else unNotes=()=>{};
+  try{history.replaceState(null,"",location.pathname+location.search+"#"+id)}catch(e){}render()}
+
+/* ======================================================================
+   Render
+   ====================================================================== */
+function render(){
+  if(!S.introDone&&S.season&&S.wrestlers.length){S.introDone=true;app.classList.add("intro");setTimeout(()=>app.classList.remove("intro"),2400)}
+  const y=window.scrollY,fid=document.activeElement&&document.activeElement.id,fpos=document.activeElement&&document.activeElement.selectionStart;
+  app.replaceChildren(topBar());
+  if(api.mode==="demo")app.append(demoBar());
+  if(!S.season||!curW()){
+    app.append(h("div",{class:"wrap",style:"padding-block:70px"},h("h1",{style:"font-size:48px;text-transform:uppercase"},!S.loaded?"Loading…":!S.season?"Season not set up yet":"No wrestlers yet"),
+      h("p",{style:"color:var(--muted)"},S.loaded?"Organizers: sign in, then use the organizer tools to set up the season and import the roster.":"")));
+    if(S.auth.admin)app.append(h("div",{class:"wrap"},orgPanel()));app.append(footer());if(S.modal)app.append(sheet());return}
+  const w=curW();
+  app.append(poster(w),strip(w));
+  const main=h("div",{class:"wrap"});app.append(main);
+  if(isMine())main.append(locker(w));
+  main.append(rosterChips(),rules(),calendar(w),backers(w),standings(),howTo());
+  if(S.auth.admin)main.append(orgPanel());
+  app.append(footer());
+  if(S.sel.size&&!S.modal)app.append(cartBar(w));
+  if(S.modal)app.append(sheet());
+  window.scrollTo(0,y);
+  if(fid){const f=document.getElementById(fid);if(f){f.focus({preventScroll:true});if(fpos!=null&&f.setSelectionRange)try{f.setSelectionRange(fpos,fpos)}catch(e){}}}
+}
+
+function topBar(){const a=S.auth;return h("header",{class:"top"},h("div",{class:"wrap"},
+  h("img",{src:"bluejay.png",alt:"Merrill Bluejays"}),
+  h("div",{class:"brand"},h("b",null,"Bluejay Backers"),h("span",null,"Merrill Girls Wrestling")),
+  h("nav",{"aria-label":"Sections"},
+    h("a",{href:"#calendar",class:"hide-sm",onclick:jump("calendar")},"Calendar"),h("a",{href:"#standings",class:"hide-sm",onclick:jump("standings")},"Standings"),
+    a.wrestlerId?h("button",{class:"me",onclick:()=>{select(a.wrestlerId);setTimeout(()=>document.getElementById("locker")?.scrollIntoView({behavior:"smooth"}),40)}},"My page"):null,
+    a.admin?h("button",{class:"me",onclick:()=>document.getElementById("organizer")?.scrollIntoView({behavior:"smooth"})},"Organizer"):null,
+    !a.signedIn?h("button",{onclick:()=>{S.modal={type:"signin",stage:"email",email:""};render()}},"Sign in"):null)))}
+const jump=id=>e=>{e.preventDefault();document.getElementById(id)?.scrollIntoView({behavior:"smooth"})};
+
+function demoBar(){const v=S.demoView;const set=x=>()=>{S.demoView=x;api.demoAs(x);if(x==="athlete")select("d3");render();window.scrollTo({top:0})};
+  return h("div",{class:"demo"},h("div",{class:"wrap"},h("span",null,h("b",null,"Preview. "),"Sample girls and sponsors; nothing is saved and no money moves. It pretends today is Mon, Dec 14."),
+    h("div",{class:"views",role:"group","aria-label":"Preview as"},[["public","Sponsor"],["athlete","Kenzie signed in"],["admin","Coach"]].map(([k,l])=>h("button",{"aria-pressed":String(v===k),onclick:set(k)},l)))))}
+
+function poster(w){const first=firstName(w.name);
+  const fig=h("div",{class:"fig"});
+  if(w.photoUrl)fig.append(h("img",{class:w.photoCutout?"cut":"framed",src:w.photoUrl,alt:first+" in her Merrill singlet"}));else fig.append(placeholderFigure());
+  if(w.weight)fig.append(h("div",{class:"wt","aria-label":w.weight+" pound weight class"},h("b",null,w.weight),h("span",null,"LBS")));
+  const paras=fillAsk(w.askText,w).split(/\n\s*\n/).map(s=>s.trim()).filter(Boolean);
+  const sponsors=w.sponsorCount||0;
+  const names=[...new Set(Object.values(S.claims).filter(c=>c.status==="paid").map(c=>c.displayName))].slice(0,5);
+  return h("section",{class:"poster","aria-label":first+"'s message"},matSVG(),h("div",{class:"beam","aria-hidden":"true"}),h("div",{class:"edge","aria-hidden":"true"}),h("div",{class:"bigname","aria-hidden":"true"},first),
+    h("div",{class:"wrap"},fig,
+      h("div",{class:"say"},
+        h("div",{class:"bubble"},h("span",{class:"tape","aria-hidden":"true"}),h("div",{class:"hi"},"Be in my ",h("em",null,"corner")),paras.map(p=>h("p",null,p)),h("div",{class:"sig"},"— "+first,h("img",{src:"bluejay.png",alt:""}))),
+        h("div",{class:"corner"},
+          names.length?h("div",{class:"who","aria-hidden":"true"},names.map((n,i)=>h("i",{style:"background:"+DOT_COLORS[i%DOT_COLORS.length]},n==="Anonymous"?"♥":initials(n)))):null,
+          h("span",null,sponsors?[h("b",null,sponsors+" "+(sponsors===1?"person is":"people are")),` in ${first}'s corner`]:"Be the first person in "+first+"'s corner"),
+          h("a",{class:"cta",href:"#calendar",onclick:jump("calendar")},"Sponsor a day"),h("span",{class:"scribble","aria-hidden":"true"},"only "+money(S.season.practicePriceCents)+" a day!")))))}
+
+function strip(w){const open=days().filter(d=>!isOff(d.key));const paid=open.filter(d=>{const c=claimOf(d.key);return c&&c.status==="paid"}).length;
+  const sealed=days().filter(d=>{const c=S.claims[d.key];return c&&c.status==="paid"&&c.hasNote&&d.key>api.today()}).length;
+  return h("section",{class:"strip","aria-label":"Progress"},h("div",{class:"wrap"},
+    h("div",{class:"singlet"},singletSVG(open.length?paid/open.length:0)),
+    h("div",{class:"st"},h("b",{class:"num"},paid+" / "+open.length),h("span",null,"days sponsored")),
+    h("div",{class:"st gold"},h("b",{class:"num"},money(w.raisedCents||0)),h("span",null,"raised for the team")),
+    h("div",{class:"st"},h("b",{class:"num"},String(sealed)),h("span",null,"sealed notes waiting"))))}
+
+function rosterChips(){const list=roster();if(list.length<2)return null;
+  return h("div",{class:"roster",role:"group","aria-label":"Choose a wrestler"},list.map(w=>h("button",{class:"tagbtn","aria-pressed":String(w.id===S.cur),onclick:()=>{select(w.id);window.scrollTo({top:0})}},h("span",{class:"w"},w.weight||"—"),w.name)))}
+
+function rules(){const p=S.season.practicePriceCents;return h("div",{class:"rules"},
+  h("div",{class:"rule"},h("span",{class:"p num"},money(p)),h("b",null,"Practice"),h("span",null,"One day in the room: drilling, live goes, conditioning.")),
+  h("div",{class:"rule ev"},h("span",{class:"p num"},money(p*S.season.eventMultiplier)),h("b",null,"Meet"),h("span",null,"Same as a week of practice. Duals, tournaments, WIAA.")),
+  h("div",{class:"rule bk"},h("span",{class:"p"},"5+"),h("b",null,S.season.rewardName),h("span",null,S.season.rewardText)))}
+
+/* ---------- month calendars ---------- */
+function calendar(w){
+  const today=api.today(),first=firstName(w.name),map=dayMap();
+  const contMap={};days().forEach(d=>{if(d.end){let k=addDays(d.key,1);while(k<=d.end){contMap[k]=d;k=addDays(k,1)}}});
+  const months=[...new Set(days().map(d=>d.key.slice(0,7)))];
+  const sec=h("section",{class:"cal",id:"calendar"});
+  sec.append(h("div",{class:"sechead"},h("h2",null,S.dayTool?"Turn days off":first+"'s season"),
+    h("p",null,S.dayTool?"Organizer tool: tap a practice to cancel it or bring it back.":"Tap any open day to pick it. Tap + to grab a whole week of practice. Then sponsor them all at once and leave her a note."),S.dayTool?null:h("span",{class:"scribble","aria-hidden":"true"},"pick a day!",frag(ARROW_DOWN))));
+  sec.append(h("nav",{class:"monthnav","aria-label":"Months"},months.map(m=>{const open=days().filter(d=>d.key.startsWith(m)&&!isOff(d.key)&&!claimOf(d.key)).length;
+    return h("a",{href:"#m-"+m,onclick:jump("m-"+m)},F(m+"-01",{month:"short"}),h("small",null,open+" open"))})));
+  sec.append(h("div",{class:"legend"},h("span",null,h("i",{style:"background:var(--navy);border:1.5px solid var(--line-2)"}),"Practice"),
+    h("span",null,h("i",{style:"background:#3a1230;border:1.5px solid #8d2440"}),"Meet"),h("span",null,h("i",{style:"background:var(--blue)"}),"Sponsored"),
+    h("span",null,h("i",{style:"background:#3a3214;border:2px solid var(--gold)"}),"Your picks"),h("span",null,frag(SMALL_ENV.replace("<svg",'<svg width="16" height="13" style="vertical-align:-2px;margin-right:6px"')),"Sealed note")));
+  months.forEach(m=>{
+    const [Y,M]=m.split("-").map(Number);const firstDay=new Date(Date.UTC(Y,M-1,1)),dim=new Date(Date.UTC(Y,M,0)).getUTCDate();
+    const inMonth=days().filter(d=>d.key.startsWith(m));
+    const pr=inMonth.filter(d=>d.kind==="practice"&&!isOff(d.key)).length,ev=inMonth.filter(d=>d.kind==="event").length;
+    const box=h("div",{class:"month",id:"m-"+m});
+    box.append(h("div",{class:"month-h"},h("h3",null,F(m+"-01",{month:"long"}),h("small",null,String(Y))),h("span",null,[pr?pr+" practices":"",ev?ev+" meet"+(ev>1?"s":""):""].filter(Boolean).join(" · "))));
+    const grid=h("div",{class:"grid",role:"grid","aria-label":F(m+"-01",{month:"long",year:"numeric"})});
+    grid.append(h("div",{"aria-hidden":"true"}),...["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(x=>h("div",{class:"dow","aria-hidden":"true"},x.slice(0,window.innerWidth<520?1:3))));
+    const lead=firstDay.getUTCDay();const cells=Math.ceil((lead+dim)/7)*7;
+    for(let i=0;i<cells;i++){
+      if(i%7===0){const rowKeys=[];for(let j=0;j<7;j++){const dn=i+j-lead+1;if(dn>=1&&dn<=dim)rowKeys.push(m+"-"+String(dn).padStart(2,"0"))}
+        const open=rowKeys.map(k=>map[k]).filter(d=>d&&d.kind==="practice"&&!isOff(d.key)&&!claimOf(d.key));
+        const all=open.length&&open.every(d=>S.sel.has(d.key));
+        grid.append(h("div",{class:"wk"},open.length>=2&&!S.dayTool?h("button",{"aria-pressed":String(!!all),"aria-label":(all?"Unpick":"Pick")+" all "+open.length+" open practices the week of "+short(rowKeys[0]),title:"Pick the whole week",onclick:()=>{open.forEach(d=>all?S.sel.delete(d.key):S.sel.add(d.key));render()}},all?"✓":"+"):null))}
+      const dn=i-lead+1;if(dn<1||dn>dim){grid.append(h("div",{class:"cell out","aria-hidden":"true"}));continue}
+      const key=m+"-"+String(dn).padStart(2,"0");grid.append(cell(key,map[key],contMap[key],today,first))}
+    box.append(grid);sec.append(box)});
+  return sec}
+
+function cell(key,d,cont,today,first){
+  const dn=String(+key.slice(8));const todayCls=key===today?" today":"";const past=key<today?" past":"";
+  if(cont)return h("div",{class:"cell cont"+todayCls,title:cont.name},h("span",{class:"dn"},dn),h("span",{class:"lb"},cont.label+" · day "+(Math.round((P(key)-P(cont.key))/864e5)+1)));
+  if(!d){const br=S.season.breaks&&S.season.breaks[key];return h("div",{class:"cell blank"+todayCls},h("span",{class:"dn"},dn),br?h("span",{class:"lb"},br):null)}
+  const c=claimOf(key),off=isOff(key),sel=S.sel.has(key),ev=d.kind==="event";
+  const paid=c&&c.status==="paid",held=c&&c.status==="held";
+  let cls="cell"+todayCls+past;
+  if(off)cls+=" off";else if(paid)cls+=" paid"+(ev?" evp":"");else if(held)cls+=" held";else if(sel)cls+=" sel"+(ev?" ev":"")+(S.lastPick===key?" pop":"");else cls+=ev?" ev":" open";
+  const label=longDay(key)+", "+(ev?d.name:"practice")+": "+(off?"no practice":paid?"sponsored by "+c.displayName+(c.hasNote?", with a sealed note":""):held?"someone is sponsoring it now":(sel?"picked, ":"open, ")+money(priceOf(d)));
+  const kids=[h("span",{class:"dn"},dn),h("span",{class:"lb"},off?"No practice":ev?d.label:"Practice")];
+  if(paid)kids.push(h("span",{class:"nm"},c.displayName),h("span",{class:"ini","aria-hidden":"true"},c.displayName==="Anonymous"?"♥":initials(c.displayName)));else if(held)kids.push(h("span",{class:"nm"},"Taken…"));else if(!off)kids.push(h("span",{class:"pr num"},money(priceOf(d))));
+  const b=h("button",{class:cls,"aria-label":label,"aria-pressed":(!paid&&!held&&!off&&!S.dayTool)?String(sel):null,disabled:(held&&!S.dayTool)||null,onclick:()=>onCell(d,c,first)},kids);
+  if(ev&&!off)b.append(frag(MEDAL));
+  if(paid&&c.hasNote)b.append(frag(MINI_ENV));
+  return b}
+
+async function onCell(d,c,first){
+  if(S.dayTool){if(d.kind!=="practice")return toast("Only practice days can be turned off.");const off=!isOff(d.key);
+    try{await api.setOffDay(d.key,off);toast(off?"Practice turned off":"Practice is back on")}catch(e){toast(errText(e))}return}
+  if(c&&c.status==="paid"){S.modal={type:"day",key:d.key};render();return}
+  if(isOff(d.key))return;
+  S.sel.has(d.key)?S.sel.delete(d.key):S.sel.add(d.key);S.lastPick=d.key;setTimeout(()=>{if(S.lastPick===d.key)S.lastPick=null},400);
+  if(S.sel.has(d.key)&&d.kind==="event")toast(d.name+" · "+d.where);
+  render()}
+
+function picks(keys){const map=dayMap();const items=[...(keys||S.sel)].sort().map(k=>map[k]).filter(Boolean);
+  return{items,total:items.reduce((s,d)=>s+priceOf(d),0),units:items.reduce((s,d)=>s+(d.kind==="event"?S.season.eventMultiplier:1),0)}}
+
+function cartBar(w){const s=picks();const first=firstName(w.name);
+  return h("div",{class:"cart",role:"region","aria-label":"Your picks"},h("div",{class:"wrap"},
+    h("span",{class:"sum num"},money(s.total)),
+    h("span",{class:"what"},s.items.length+" day"+(s.items.length>1?"s":"")+" for "+first+(s.units>=5?" · you'll be a "+S.season.rewardName:s.units>0?" · "+(5-s.units)+" more practice"+(5-s.units>1?"s":"")+" to be a "+S.season.rewardName:"")),
+    h("button",{class:"clr",onclick:()=>{S.sel.clear();render()}},"Clear"),
+    h("button",{class:"go",onclick:()=>{S.modal={type:"checkout",step:1,keys:[...S.sel],form:{donorName:"",anon:false,contact:"",message:"",revealDay:s.items[0].key}};render()}},S.auth.admin?"Record":"Sponsor")))}
+
+/* ---------- backers / standings / how ---------- */
+function backers(w){const map=dayMap();const t={};
+  Object.values(S.claims).forEach(c=>{if(c.status!=="paid"||c.displayName==="Anonymous"||!map[c.dayKey])return;const k=c.displayName.toLowerCase();t[k]=t[k]||{name:c.displayName,u:0};t[k].u+=map[c.dayKey].kind==="event"?S.season.eventMultiplier:1});
+  const list=Object.values(t).filter(b=>b.u>=5).sort((a,b)=>b.u-a.u);
+  return h("section",{class:"panel"},h("div",{class:"sechead"},h("h2",null,S.season.rewardName+"s"),h("p",null,"Sponsored a week of practice or a meet for "+firstName(w.name)+".")),
+    list.length?h("div",{class:"backers"},list.map(b=>h("span",{class:"backer"},h("img",{src:"bluejay.png",alt:""}),b.name))):h("p",{class:"empty"},"No Backers yet. Pick five practices or a meet to be the first."))}
+
+function standings(){const list=roster().slice().sort((a,b)=>(b.raisedCents||0)-(a.raisedCents||0));const top=Math.max(1,...list.map(w=>w.raisedCents||0));
+  return h("section",{class:"panel",id:"standings"},h("div",{class:"sechead"},h("h2",null,"Team standings"),h("p",null,"Who's filling their calendar fastest. It all goes to the whole team.")),
+    h("div",{class:"teamtotal"},h("b",{class:"num"},money(S.team.raisedCents||0)),h("span",null,"raised by the team · "+(S.team.daysPaid||0)+" days sponsored")),
+    list.length>=3&&list[0].raisedCents?h("div",{class:"podium"},[1,0,2].map(i=>{const w=list[i];return h("button",{class:"pod p"+(i+1),onclick:()=>{select(w.id);window.scrollTo({top:0})},"aria-label":`${i+1}. ${w.name}, ${money(w.raisedCents||0)}`},
+      h("span",{class:"av",style:w.photoUrl?`background-image:url("${encodeURI(w.photoUrl)}")`:""},w.photoUrl?"":initials(firstName(w.name))),
+      h("span",{class:"nm"},firstName(w.name)),h("span",{class:"amt num"},money(w.raisedCents||0)),h("span",{class:"blk"},String(i+1)))})):null,
+    h("div",{class:"board"},(list.length>=3&&list[0].raisedCents?list.slice(3):list).map((w,j,arr)=>{const i=list.indexOf(w);return h("button",{class:"rank"+(i===0&&w.raisedCents?" first":""),onclick:()=>{select(w.id);window.scrollTo({top:0})},"aria-label":`${i+1}. ${w.name}, ${money(w.raisedCents||0)}`},
+      h("span",{class:"pos num"},String(i+1)),h("span",{class:"nm"},h("span",null,w.name),w.weight?h("small",null,w.weight+" LB"):null),
+      h("span",{class:"bar"},h("i",{style:`width:${Math.round(100*(w.raisedCents||0)/top)}%`})),
+      h("span",{class:"amt num"},money(w.raisedCents||0),h("small",null,(w.daysPaid||0)+((w.daysPaid||0)===1?" day · ":" days · ")+(w.sponsorCount||0)+((w.sponsorCount||0)===1?" sponsor":" sponsors"))))}))) }
+
+function howTo(){return h("section",{class:"panel",id:"how"},h("div",{class:"sechead"},h("h2",null,"How it works")),h("div",{class:"howto"},
+  h("div",null,h("b",null,"1"),h("h3",null,"Pick her days"),h("p",null,"Tap practices and meets on her calendar. Five practices cost the same as one meet.")),
+  h("div",null,h("b",null,"2"),h("h3",null,"Leave a note"),h("p",null,"She opens it the morning of the day you pick, after a coach reads it. It stays in her locker all season.")),
+  h("div",null,h("b",null,"3"),h("h3",null,"Pay the team"),h("p",null,S.season.payNote+" Your days turn blue the moment the payment goes through."))))}
+
+function footer(){const a=S.auth;return h("footer",{class:"wrap foot"},h("span",null,"Merrill High School Girls Wrestling · 2026–27 · Schedule from the team schedule and the WIAA calendar."),
+  a.signedIn?h("span",null,a.email+" · ",h("button",{onclick:()=>{api.signOut();if(api.mode==="demo")S.demoView="public"}},"Sign out")):h("button",{onclick:()=>{S.modal={type:"signin",stage:"email",email:""};render()}},"Wrestler or coach sign-in"))}
+
+/* ---------- her locker ---------- */
+function locker(w){const today=api.today(),first=firstName(w.name);const todays=S.notes.filter(n=>n.revealDay===today);
+  const sealed=days().filter(d=>{const c=S.claims[d.key];return c&&c.status==="paid"&&c.hasNote&&d.key>today});
+  const opened=S.notes.filter(n=>n.revealDay!==today);
+  const box=h("section",{class:"locker",id:"locker","aria-label":"Your locker"},h("div",null,h("div",{class:"eyebrow"},"Only you and your coaches see this"),h("h2",null,"Your locker, "+first)));
+  if(todays.length)todays.forEach(n=>box.append(h("div",{class:"todaynote open"},frag(`<div class="env">${ENVELOPE(true)}</div>`),
+    h("div",null,h("div",{class:"eyebrow"},"Today's note · "+longDay(today)),h("q",null,n.text),h("div",{class:"from"},"— "+n.fromName)))));
+  else box.append(h("div",{class:"todaynote"},frag(`<div class="env">${ENVELOPE(false)}</div>`),h("div",null,h("div",{class:"eyebrow"},longDay(today)),
+    h("q",{style:"quotes:none"},sealed.length?"No note today. Your next one opens "+F(sealed[0].key,{weekday:"long",month:"short",day:"numeric"})+".":"No sealed notes yet. Send your link and they'll start coming in."),
+    h("p",null,"Notes open at 5 a.m. on their day and stay here all season."))));
+  if(sealed.length)box.append(h("div",null,h("h3",null,sealed.length+" sealed"),h("div",{class:"sealed"},sealed.slice(0,30).map(d=>h("span",null,frag(SMALL_ENV),short(d.key))))));
+  if(opened.length)box.append(h("div",null,h("h3",null,"Opened notes"),h("div",{class:"notes"},opened.map((n,i)=>h("article",{class:"notecard",style:`--r:${[-1.2,.9,-.5,1.3][i%4]}deg`},h("p",null,n.text),h("footer",null,h("b",null,n.fromName),h("span",null,short(n.revealDay))))))));
+  // edit message + photo
+  const ta=h("textarea",{class:"inp",id:"my-ask",maxlength:"900",style:"min-height:220px"});ta.value=w.askText||DEFAULT_ASK(first);
+  const file=h("input",{type:"file",accept:"image/*",id:"my-photo",class:"sr",onchange:e=>uploadFor(w,e.target.files[0],p=>api.updateMyProfile(p))});
+  box.append(h("div",{class:"two"},
+    h("div",{class:"card"},h("h3",null,"Your message"),h("p",null,"This is what people read in your speech bubble. Make it sound like you. {practice} and {meet} fill in the prices."),ta,
+      h("div",{class:"btns"},h("button",{class:"btn",onclick:()=>{ta.value=DEFAULT_ASK(first)}},"Start over"),h("button",{class:"btn blu",onclick:async e=>{e.target.disabled=true;try{await api.updateMyProfile({askText:ta.value});toast("Saved. Your bubble is updated.")}catch(er){toast(errText(er))}e.target.disabled=false}},"Save message"))),
+    h("div",{class:"card"},h("h3",null,"Your photo"),h("p",null,"An action shot or a pose in your singlet. For the cutout look, remove the background first: on iPhone, press and hold yourself in the Photos app and tap Copy or Share; on Android, use Cutout in Google Photos. Save it as PNG."),
+      h("div",{class:"btns",style:"justify-content:flex-start"},h("label",{class:"btn blu",for:"my-photo",style:"cursor:pointer"},w.photoUrl?"Replace photo":"Upload photo",file)),
+      h("h3",{style:"margin-top:10px"},"Ask your people"),h("p",null,"Texts from you work far better than a post. Send this to family, neighbors, and family friends one at a time."),
+      (()=>{const link=shareLink(w);const msg=`Hi! It's ${first}. I'm wrestling for Merrill this winter and raising money for our team. You can sponsor one of my practices (${money(S.season.practicePriceCents)}) or a meet (${money(S.season.practicePriceCents*S.season.eventMultiplier)}) and leave me a note I'll open that morning. Here's my calendar: ${link}\nIt would mean a lot. Thank you!`;
+        const el=h("div",{class:"share"},msg);return h("div",{style:"display:grid;gap:8px"},el,h("div",{class:"btns",style:"justify-content:flex-start"},h("button",{class:"btn",onclick:()=>copy(msg,el)},"Copy text"),h("button",{class:"btn",onclick:()=>copy(link)},"Copy link")))})())));
+  return box}
+const shareLink=w=>(api.mode==="live"?location.origin+location.pathname:"https://<your-site>.web.app/")+"#"+w.id;
+
+async function uploadFor(w,f,save){if(!f)return;toast("Uploading…");
+  try{const {blob,type,cutout}=await prepImage(f);const url=await api.uploadPhoto(w.id,blob,type);await save({photoUrl:url,photoCutout:cutout});toast(cutout?"Cutout photo saved":"Photo saved")}catch(e){toast(errText(e))}}
+/* Shrinks to 1100px. Keeps PNG transparency and detects it: a see-through edge means a cutout. */
+function prepImage(file){return new Promise((res,rej)=>{const img=new Image();img.onload=()=>{const s=Math.min(1,1100/Math.max(img.width,img.height));const c=document.createElement("canvas");c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);
+  const x=c.getContext("2d");x.drawImage(img,0,0,c.width,c.height);let cutout=false;
+  try{const W=c.width,H=c.height,pts=[[1,1],[W-2,1],[1,H-2],[W-2,H-2],[W>>1,1]];cutout=pts.filter(([a,b])=>x.getImageData(a,b,1,1).data[3]<20).length>=3}catch(e){}
+  const type=cutout?"image/png":"image/jpeg";c.toBlob(b=>b?res({blob:b,type,cutout}):rej(new Error("Couldn't read that image")),type,.88)};
+  img.onerror=()=>rej(new Error("Couldn't read that image. Try a JPG or PNG."));img.src=URL.createObjectURL(file)})}
+
+/* ---------- sheets ---------- */
+let holdTimer=null;
+function close(){S.modal=null;clearInterval(holdTimer);render()}
+function sheet(){const m=S.modal;
+  const scrim=h("div",{class:"scrim",onclick:e=>{if(e.target===scrim&&!(m.type==="checkout"&&m.step===2))close()}});
+  const box=h("div",{class:"sheet",role:"dialog","aria-modal":"true","aria-labelledby":"sheet-h"});scrim.append(box);
+  if(m.type==="signin")signinSheet(box,m);else if(m.type==="day")daySheet(box,m);else checkoutSheet(box,m);
+  setTimeout(()=>{if(!box.contains(document.activeElement)){const f=box.querySelector("input:not(.sr),textarea,.paybtn,.btn.pri,.btn.blu");f&&f.focus()}},0);
+  return scrim}
+
+function daySheet(box,m){const d=dayMap()[m.key],c=S.claims[m.key],w=curW();
+  box.append(h("div",{class:"eyebrow"},longDay(m.key)),h("h3",{id:"sheet-h"},d.kind==="event"?d.name:"Practice day"),
+    d.where?h("p",{style:"margin:0;color:var(--muted)"},d.where):null,
+    h("p",{style:"margin:0;font-size:18px"},"Sponsored by ",h("b",null,c.displayName),"."),
+    c.hasNote?h("p",{class:"mod"},m.key<=api.today()?firstName(w.name)+" has opened the note for this day.":"There's a sealed note waiting. "+firstName(w.name)+" opens it the morning of "+short(m.key)+"."):null,
+    h("div",{class:"btns"},h("button",{class:"btn pri",onclick:close},"Close")))}
+
+function signinSheet(box,m){
+  const err=h("p",{class:"err",role:"alert"});
+  if(m.stage==="sent"){box.append(h("h3",{id:"sheet-h"},"Check your email"),h("p",{style:"margin:0"},"We sent a sign-in link to ",h("b",null,m.email),". Open it on this device. It may take a minute, and school email sometimes files it under Junk."),h("div",{class:"btns"},h("button",{class:"btn pri",onclick:close},"OK")));return}
+  if(m.stage==="confirm"){const em=h("input",{class:"inp",id:"si-email2",type:"email",autocomplete:"email"});
+    box.append(h("h3",{id:"sheet-h"},"Confirm your email"),h("p",{style:"margin:0;color:var(--muted)"},"You opened the link on a different device. Type the same email to finish signing in."),em,err,
+      h("div",{class:"btns"},h("button",{class:"btn",onclick:()=>{m.resolve("");close()}},"Cancel"),h("button",{class:"btn pri",onclick:()=>{m.resolve(em.value.trim());close()}},"Sign in")));return}
+  const em=h("input",{class:"inp",id:"si-email",type:"email",autocomplete:"email",placeholder:"you@example.org",value:m.email,oninput:e=>m.email=e.target.value});
+  box.append(h("h3",{id:"sheet-h"},"Sign in"),h("p",{style:"margin:0;color:var(--muted)"},"Wrestlers: use the school email your coach put on the roster. Coaches: use the email on the organizer list. No password; we email you a link."),
+    h("label",{class:"field",for:"si-email"},"Email",em),err,
+    h("div",{class:"btns"},h("button",{class:"btn",onclick:()=>api.signInGoogle().then(close).catch(e=>err.textContent=errText(e))},"Use Google instead"),
+      h("button",{class:"btn pri",onclick:async e=>{const v=m.email.trim();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){err.textContent="Enter a full email address.";return}
+        e.target.disabled=true;try{await api.sendSignInLink(v);m.stage="sent";render()}catch(er){err.textContent=errText(er);e.target.disabled=false}}},"Email me a link")))}
+
+function checkoutSheet(box,m){const w=curW(),s=picks(m.keys),first=firstName(w.name),org=S.auth.admin;
+  box.append(h("div",{class:"steps","aria-hidden":"true"},[1,2,3].map(i=>h("i",{class:i<=m.step?"on":""}))));
+  if(m.step===1){const f=m.form;
+    const name=h("input",{class:"inp",id:"c-name",autocomplete:"name",value:f.donorName,maxlength:"60",oninput:e=>f.donorName=e.target.value});
+    const anon=h("input",{type:"checkbox",id:"c-anon",onchange:e=>f.anon=e.target.checked});anon.checked=f.anon;
+    const contact=h("input",{class:"inp",id:"c-contact",autocomplete:"email",value:f.contact,maxlength:"120",oninput:e=>f.contact=e.target.value});
+    const cnt=h("div",{class:"counter num"},f.message.length+"/280");
+    const msg=h("textarea",{class:"inp note-in",id:"c-msg",maxlength:"280",placeholder:`Dear ${first}, …`,oninput:e=>{f.message=e.target.value;cnt.textContent=f.message.length+"/280"}});msg.value=f.message;
+    const rev=h("select",{class:"inp",id:"c-rev",onchange:e=>f.revealDay=e.target.value},s.items.map(d=>h("option",{value:d.key},F(d.key,{weekday:"short",month:"short",day:"numeric"})+(d.kind==="event"?" · "+d.name:" · practice"))));rev.value=f.revealDay;
+    const err=h("p",{class:"err",role:"alert"});
+    box.append(h("h3",{id:"sheet-h"},org?"Record a sponsor":"Back "+first),
+      h("div",{class:"summary"},s.items.slice(0,5).map(d=>h("div",null,h("span",null,F(d.key,{weekday:"short",month:"short",day:"numeric"})+" · "+(d.kind==="event"?d.name:"Practice")),h("span",{class:"num"},money(priceOf(d))))),
+        s.items.length>5?h("div",null,h("span",null,"+ "+(s.items.length-5)+" more"),h("span",null,"")):null,h("div",{class:"tot"},h("span",null,"Total"),h("span",{class:"num"},money(s.total)))),
+      h("label",{class:"field",for:"c-msg"},h("span",null,"Your note to "+first+" ",h("small",null,"(the best part)")),msg,cnt),
+      s.items.length>1?h("label",{class:"field",for:"c-rev"},"She opens it on",rev):h("p",{class:"mod",style:"border-color:var(--sky)"},"She opens it the morning of "+longDay(s.items[0].key)+"."),
+      h("label",{class:"field",for:"c-name"},"Your name",name),
+      h("label",{class:"check"},anon,"Show me as Anonymous on her calendar"),
+      h("label",{class:"field",for:"c-contact"},h("span",null,"Email or phone ",h("small",null,"(optional; only organizers see it)")),contact),
+      h("p",{class:"mod"},"A coach reads every note before it reaches her."),err,
+      h("div",{class:"btns"},h("button",{class:"btn",onclick:close},"Cancel"),h("button",{class:"btn pri",onclick:async e=>{
+        if(!f.donorName.trim()){err.textContent="Add your name so she knows who to thank.";name.focus();return}
+        if(org){m.step=2;render();return}
+        e.target.disabled=true;e.target.textContent="Holding your days…";
+        try{m.order=await api.createOrder({wrestlerId:w.id,dayKeys:s.items.map(d=>d.key),donorName:f.donorName.trim(),anon:f.anon,contact:f.contact.trim(),message:f.message.trim(),revealDay:f.revealDay});m.step=2;render()}
+        catch(er){const tk=er.details&&er.details.taken;if(tk){tk.forEach(k=>S.sel.delete(k));m.keys=m.keys.filter(k=>!tk.includes(k));if(!m.keys.length){close();toast("Those days were just taken. Pick others.");return}err.textContent="Someone just took "+tk.map(short).join(", ")+". It's off your list.";}else err.textContent=errText(er);
+          e.target.disabled=false;e.target.textContent="Continue to payment"}}},org?"Continue":"Continue to payment")))}
+  else if(m.step===2&&org){const err=h("p",{class:"err",role:"alert"});
+    const rec=async(method,btn)=>{btn.disabled=true;try{await api.recordPayment({wrestlerId:w.id,dayKeys:s.items.map(d=>d.key),donorName:m.form.donorName.trim(),anon:m.form.anon,contact:m.form.contact,message:m.form.message,revealDay:m.form.revealDay,method});
+      m.paid={total:s.total,units:s.units};m.step=3;S.sel.clear();render()}catch(e){err.textContent=errText(e);btn.disabled=false}};
+    box.append(h("h3",{id:"sheet-h"},"How did they pay?"),h("div",{class:"paybox"},h("span",{class:"amt num"},money(s.total)),h("span",null,m.form.donorName+" → "+first)),err,
+      h("div",{class:"btns"},h("button",{class:"btn",onclick:()=>{m.step=1;render()}},"Back"),[["cash","Cash"],["check","Check"],["venmo","Venmo received"]].map(([k,l])=>h("button",{class:"btn blu",onclick:e=>rec(k,e.target)},l))))}
+  else if(m.step===2&&S.payMode==="manual"){const o=m.order;const memo=first+" – "+m.form.donorName.trim();const el=h("div",{class:"share",style:"text-align:center"},memo);
+    box.append(h("h3",{id:"sheet-h"},"Pay the team"),h("div",{class:"paybox"},h("span",{class:"amt num"},money(o.amountCents)),h("span",null,S.season.payNote),
+      h("span",{style:"font-size:14px;color:var(--muted)"},"Put this in the memo so the coaches can match it:"),el,h("button",{class:"btn",onclick:()=>copy(memo,el)},"Copy memo")),
+      h("p",{class:"mod"},"Your days are held for 3 days. They turn blue on her calendar as soon as a coach confirms your payment."),
+      h("div",{class:"btns"},h("button",{class:"btn pri",onclick:()=>{m.paid={total:o.amountCents,units:s.units,pending:true};m.step=3;S.sel.clear();render()}},"Got it")))}
+  else if(m.step===2){const o=m.order,err=h("p",{class:"err",role:"alert"}),timer=h("div",{class:"timer num"});
+    const tick=()=>{const left=Math.max(0,o.holdExpires-Date.now());timer.textContent=left?"Your days are held for "+Math.floor(left/60000)+":"+String(Math.floor(left/1000)%60).padStart(2,"0"):"Your hold ran out. You can still pay if nobody else took the days."};
+    clearInterval(holdTimer);holdTimer=setInterval(tick,1000);tick();
+    box.append(h("h3",{id:"sheet-h"},"Pay the team"),h("div",{class:"paybox"},h("span",{class:"amt num"},money(o.amountCents)),h("span",null,"to the Merrill Wrestling booster club"),
+      h("button",{class:"paybtn",onclick:async e=>{const b=e.currentTarget;b.disabled=true;b.firstChild.textContent="Processing…";
+        try{const r=await api.mockPay(o.orderId);clearInterval(holdTimer);if(r.status==="conflict"){err.textContent="Your hold ran out and someone else took a day. An organizer will refund you.";return}
+          m.paid={total:o.amountCents,units:s.units};m.step=3;S.sel.clear();render()}catch(er){err.textContent=errText(er);b.disabled=false;b.firstChild.textContent="Pay with Venmo"}}},
+        "Pay with Venmo",h("small",null,S.payMode==="mock"?"Test mode · no money moves":"Opens secure checkout")),timer),err,
+      S.payMode==="mock"?h("p",{class:"mod"},"Stand-in payment step. When the booster club picks its processor, this button opens that checkout and the calendar updates when the payment clears."):null,
+      h("div",{class:"btns"},h("button",{class:"btn",onclick:close},"Pay later")))}
+  else{const backer=m.paid.units>=5;
+    box.append(h("div",{class:"done"},h("img",{src:"bluejay.png",alt:""}),h("h3",{id:"sheet-h"},"You're in "+first+"'s corner"),
+      h("p",{style:"margin:0;color:var(--muted)"},money(m.paid.total)+(m.paid.pending?" for the team, once your payment arrives. ":" for the team. ")+(m.form.message?"Your note is sealed. She'll open it the morning of "+longDay(m.form.revealDay)+".":"Thank you for backing Merrill girls wrestling.")),
+      backer?h("span",{class:"badge"},"You're a "+S.season.rewardName):null),h("div",{class:"btns"},h("button",{class:"btn pri",onclick:close},"Done")))}
+}
+
+/* ---------- organizer ---------- */
+function orgPanel(){const wrap=h("section",{class:"org",id:"organizer"});
+  wrap.append(h("div",{class:"eyebrow"},"Signed in as "+S.auth.email),h("h2",null,"Organizer"));
+  if(!S.season){wrap.append(h("div",{class:"btns",style:"justify-content:flex-start;margin-top:14px"},h("button",{class:"btn pri",onclick:()=>api.setup().then(()=>toast("Season set up")).catch(e=>toast(errText(e)))},"Set up season")));return wrap}
+  const pend=S.admin.pending,ords=S.admin.orders,open=ords.filter(o=>o.status==="pending"||o.status==="conflict");
+  const T=[["notes","Notes to read ("+pend.length+")"],["money","Money ("+open.length+" open)"],["roster","Roster & logins"],["settings","Settings"]];
+  wrap.append(h("div",{class:"tabs",role:"tablist"},T.map(([k,l])=>h("button",{role:"tab","aria-selected":String(S.orgTab===k),onclick:()=>{S.orgTab=k;render()}},l))));
+  const wn=id=>(S.wrestlers.find(w=>w.id===id)||{}).name||id;
+  if(S.orgTab==="notes"){
+    wrap.append(h("p",{style:"color:var(--muted);margin:14px 0 0"},"Approve each note so it can open on its day. You can fix a typo or trim something before approving."));
+    if(!pend.length)wrap.append(h("p",{class:"empty",style:"margin-top:12px"},"All caught up."));
+    pend.sort((a,b)=>a.revealDay.localeCompare(b.revealDay)).forEach(n=>{const ta=h("textarea",{class:"inp",id:"mod-"+n.id,maxlength:"280"});ta.value=n.text;
+      wrap.append(h("div",{class:"q"},h("div",{class:"meta"},h("b",null,"For "+wn(n.wrestlerId)),h("span",null,"from "+n.fromName),h("span",null,"opens "+F(n.revealDay,{weekday:"short",month:"short",day:"numeric"}))),ta,
+        h("div",{class:"btns"},h("button",{class:"btn mini",onclick:()=>api.moderate(n.id,false).then(()=>toast("Hidden. She won't see it.")).catch(e=>toast(errText(e)))},"Don't show her"),
+          h("button",{class:"btn blu mini",onclick:()=>api.moderate(n.id,true,ta.value).then(()=>toast("Approved")).catch(e=>toast(errText(e)))},"Approve"))))})}
+  else if(S.orgTab==="money"){
+    const rows=roster().map(w=>{const os=ords.filter(o=>o.wrestlerId===w.id);const by=k=>os.filter(o=>o.status==="paid"&&((o.payment&&o.payment.provider)||o.method)===k).reduce((s,o)=>s+o.amountCents,0);
+      return{w,online:by("mock")+by("online")+by("manual"),cash:by("cash")+by("check"),venmo:by("venmo"),open:os.filter(o=>o.status==="pending").reduce((s,o)=>s+o.amountCents,0),n:os.filter(o=>o.status==="paid").length}});
+    wrap.append(h("h3",null,"Collected by wrestler"),h("div",{class:"tablewrap"},h("table",null,h("thead",null,h("tr",null,...["Wrestler","Sponsors","Online","Cash & check","Venmo","Total","Unpaid"].map(x=>h("th",null,x)))),
+      h("tbody",null,rows.map(r=>h("tr",null,h("td",null,r.w.name),h("td",{class:"num"},String(r.n)),h("td",{class:"num"},money(r.online)),h("td",{class:"num"},money(r.cash)),h("td",{class:"num"},money(r.venmo)),h("td",{class:"num"},h("b",null,money(r.w.raisedCents||0))),h("td",{class:"num"},money(r.open))))))));
+    wrap.append(h("h3",null,"Every sponsorship"),h("p",{style:"color:var(--muted);margin:0"},"To record cash or a check, pick the days on her calendar while signed in and tap Record."));
+    if(!ords.length)wrap.append(h("p",{class:"empty"},"Nothing yet."));
+    ords.slice(0,80).forEach(o=>wrap.append(h("div",{class:"q"},h("div",{class:"meta"},h("span",{class:"st-pill "+o.status},o.status),h("b",null,money(o.amountCents)),h("span",null,o.donorName+(o.anon?" (anonymous)":"")+" → "+wn(o.wrestlerId)),h("span",null,o.dayKeys.length+" day"+(o.dayKeys.length>1?"s":"")),h("span",null,(o.payment&&o.payment.provider)||o.method),o.contact?h("span",null,o.contact):null),
+      h("div",{class:"btns"},o.status==="pending"?h("button",{class:"btn blu mini",onclick:()=>api.confirmOrder(o.id).then(()=>toast("Marked paid")).catch(e=>toast(errText(e)))},"Money received"):null,
+        o.status!=="void"?h("button",{class:"btn mini",onclick:e=>{if(e.target.dataset.sure)api.voidOrder(o.id).then(()=>toast("Voided")).catch(er=>toast(errText(er)));else{e.target.dataset.sure="1";e.target.textContent="Tap again to void"}}},"Void"):null))))}
+  else if(S.orgTab==="roster")wrap.append(rosterTools());
+  else{const pp=h("input",{class:"inp",id:"s-price",type:"number",min:"1",max:"100",step:"1",value:String(S.season.practicePriceCents/100),style:"width:110px"});
+    const rn=h("input",{class:"inp",id:"s-rn",value:S.season.rewardName}),rt=h("textarea",{class:"inp",id:"s-rt"}),pn=h("input",{class:"inp",id:"s-pn",value:S.season.payNote});rt.value=S.season.rewardText;
+    wrap.append(h("div",{style:"display:grid;gap:12px;max-width:640px;margin-top:14px"},
+      h("div",{style:"display:flex;gap:12px;flex-wrap:wrap"},h("label",{class:"field",for:"s-price"},"Practice price ($)",pp),h("label",{class:"field",for:"s-rn",style:"flex:1;min-width:200px"},"Reward name",rn)),
+      h("p",{class:"mod"},"A meet always costs 5 practices. Price changes apply to new sponsorships."),
+      h("label",{class:"field",for:"s-rt"},"What a Backer gets",rt),h("label",{class:"field",for:"s-pn"},"Where the money goes (How it works)",pn),
+      h("div",{class:"btns",style:"justify-content:flex-start"},h("button",{class:"btn blu",onclick:()=>api.saveSettings({practicePriceCents:Math.round(+pp.value*100),rewardName:rn.value.trim(),rewardText:rt.value.trim(),payNote:pn.value.trim()}).then(()=>toast("Saved")).catch(e=>toast(errText(e)))},"Save settings"),
+        h("button",{class:"btn"+(S.dayTool?" blu":""),onclick:()=>{S.dayTool=!S.dayTool;S.sel.clear();render();if(S.dayTool)document.getElementById("calendar").scrollIntoView({behavior:"smooth"})}},S.dayTool?"Done turning days off":"Turn practice days off"),
+        h("button",{class:"btn",onclick:()=>api.setup().then(()=>toast("Schedule reloaded")).catch(e=>toast(errText(e)))},"Reload schedule"))))}
+  return wrap}
+
+function rosterTools(){const box=h("div",{style:"display:grid;gap:12px;margin-top:14px"});
+  box.append(h("p",{style:"color:var(--muted);margin:0"},"Upload a CSV with a name, school email, and weight class for each girl. Each one gets her own page and signs in with that email. Re-uploading updates names and weights; it never creates duplicates."));
+  const input=h("input",{type:"file",accept:".csv,text/csv",id:"csv-in",class:"sr",onchange:e=>readCsv(e.target.files[0])});
+  const drop=h("label",{class:"drop",for:"csv-in",ondragover:e=>{e.preventDefault();drop.classList.add("over")},ondragleave:()=>drop.classList.remove("over"),ondrop:e=>{e.preventDefault();drop.classList.remove("over");readCsv(e.dataTransfer.files[0])}},
+    h("b",{style:"color:var(--ink)"},"Choose roster CSV"),h("div",null,"or drop it here · columns: name, email, weight"),input);
+  box.append(drop);
+  if(S.csv){const r=S.csv;box.append(h("div",{class:"q"},h("div",{class:"meta"},h("b",null,r.rows.length+" girls found"),r.bad.length?h("span",{style:"color:var(--red-soft)"},r.bad.length+" rows skipped (missing name or email)"):null),
+    h("div",{class:"tablewrap"},h("table",null,h("thead",null,h("tr",null,h("th",null,"Name"),h("th",null,"Email"),h("th",null,"Weight"))),h("tbody",null,r.rows.slice(0,40).map(x=>h("tr",null,h("td",null,x.name),h("td",null,x.email),h("td",null,x.weight||"")))))),
+    h("div",{class:"btns"},h("button",{class:"btn",onclick:()=>{S.csv=null;render()}},"Cancel"),h("button",{class:"btn blu",onclick:async e=>{e.target.disabled=true;try{const res=await api.importRoster(r.rows);S.csv=null;toast(`Added ${res.added}, updated ${res.updated}`+(res.skipped.length?`, skipped ${res.skipped.length}`:""));if(!S.cur&&roster()[0])select(roster()[0].id);render()}catch(er){toast(errText(er));e.target.disabled=false}}},"Import roster"))))}
+  const list=S.wrestlers.slice().sort((a,b)=>(+a.weight||999)-(+b.weight||999));
+  box.append(h("div",{class:"tablewrap"},h("table",null,h("thead",null,h("tr",null,...["Name","Wt","School email","Photo","On site",""].map(x=>h("th",null,x)))),
+    h("tbody",null,list.map(w=>{const n=h("input",{class:"inp",id:"rn-"+w.id,value:w.name,style:"min-width:140px"}),wt=h("input",{class:"inp",id:"rw-"+w.id,value:w.weight||"",inputmode:"numeric",style:"width:64px"});
+      const act=h("input",{type:"checkbox",id:"ra-"+w.id});act.checked=w.active!==false;
+      const f=h("input",{type:"file",accept:"image/*",class:"sr",id:"rp-"+w.id,onchange:e=>uploadFor(w,e.target.files[0],p=>api.saveWrestler({id:w.id,...p}))});
+      return h("tr",null,h("td",null,n),h("td",null,wt),h("td",{style:"font-size:13px;color:var(--muted)"},S.admin.emails[w.id]||"—"),
+        h("td",null,h("label",{class:"btn mini",for:"rp-"+w.id,style:"display:inline-block;cursor:pointer"},w.photoUrl?"Replace":"Upload",f)),h("td",null,h("label",{class:"check"},act,h("span",{class:"sr"},"Show on site"))),
+        h("td",null,h("button",{class:"btn blu mini",onclick:()=>api.saveWrestler({id:w.id,name:n.value.trim(),weight:wt.value.trim(),active:act.checked}).then(()=>toast("Saved")).catch(e=>toast(errText(e)))},"Save")))})))));
+  return box}
+
+function parseCsv(text){const rows=[];let row=[],f="",q=false;for(let i=0;i<text.length;i++){const ch=text[i];
+    if(q){if(ch==='"'){if(text[i+1]==='"'){f+='"';i++}else q=false}else f+=ch}
+    else if(ch==='"')q=true;else if(ch===","){row.push(f);f=""}else if(ch==="\n"||ch==="\r"){if(ch==="\r"&&text[i+1]==="\n")i++;row.push(f);rows.push(row);row=[];f=""}else f+=ch}
+  if(f||row.length){row.push(f);rows.push(row)}return rows.filter(r=>r.some(c=>c.trim()))}
+function readCsv(file){if(!file)return;const rd=new FileReader();rd.onload=()=>{const all=parseCsv(String(rd.result).replace(/^﻿/,""));if(!all.length)return toast("That file is empty.");
+  const head=all[0].map(x=>x.trim().toLowerCase());const has=head.some(x=>/mail/.test(x));
+  const ix=re=>head.findIndex(x=>re.test(x));let iName=ix(/^(full\s*)?name$|student/),iFirst=ix(/first/),iLast=ix(/last/),iEmail=ix(/mail/),iW=ix(/weight|wt|class/);
+  const body=has?all.slice(1):all;if(!has){iName=0;iEmail=body[0].findIndex(c=>c.includes("@"));iW=2;iFirst=iLast=-1}
+  const rows=[],bad=[];body.forEach(r=>{const name=(iName>=0?r[iName]:[r[iFirst],r[iLast]].filter(Boolean).join(" "))||"";const email=(r[iEmail]||"").trim();const weight=(r[iW]||"").replace(/\D/g,"");
+    (name.trim()&&/@/.test(email)?rows:bad).push({name:name.trim(),email,weight})});
+  S.csv={rows,bad};render()};rd.readAsText(file)}
+
+/* ======================================================================
+   Boot
+   ====================================================================== */
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&S.modal&&!(S.modal.type==="checkout"&&S.modal.step===2))close()});
+(async function boot(){
+  try{api=await makeLiveBackend()}catch(e){api=makeDemoBackend()}
+  api.watchSeason(s=>{S.season=s;S.loaded=true;render()});
+  api.watchTeam(t=>{S.team=t;render()});
+  api.watchWrestlers(list=>{S.wrestlers=list;if(!S.cur){const want=location.hash.slice(1);const r=roster();const pick=r.find(w=>w.id===want)||r.find(w=>w.id==="d3")||r[0];if(pick)select(pick.id)}render()});
+  api.onAuth(a=>{const was=S.auth.wrestlerId;S.auth=a;
+    if(a.admin&&!unAdmin)unAdmin=api.watchAdmin(d=>{S.admin=d;render()});
+    if(!a.admin&&unAdmin){unAdmin();unAdmin=null;S.dayTool=false}
+    if(a.wrestlerId&&a.wrestlerId!==was){S.cur=null;select(a.wrestlerId)}
+    if(!a.wrestlerId&&was){unNotes();S.notes=[]}
+    if(a.signedIn&&!a.admin&&!a.wrestlerId)toast("Signed in, but "+a.email+" isn't on the roster or organizer list. Ask your coach.");
+    render()});
+  try{await api.finishEmailLink(()=>new Promise(r=>{S.modal={type:"signin",stage:"confirm",resolve:r};render()}))}catch(e){toast(errText(e))}
+  S.payMode=await api.paymentMode();
+  window.addEventListener("hashchange",()=>{const id=location.hash.slice(1);if(S.wrestlers.some(w=>w.id===id))select(id)});
+  render();
+})();
+})();
+</script>
