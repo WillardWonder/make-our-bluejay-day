@@ -361,6 +361,22 @@ th{font:800 13px var(--display);letter-spacing:.1em;text-transform:uppercase;col
 @keyframes fill{from{transform:translateY(100%)}to{transform:none}}
 
 /* ---------- hero v3: clean poster, handwritten note ---------- */
+/* nudges */
+.quick{background:var(--navy);border:1px solid var(--line-2);border-radius:14px;padding:14px;margin:6px 0 14px;display:grid;gap:10px}
+.quick-h{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline}
+.quick-h b{font:800 13px var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--sky)}
+.quick-h span{color:var(--muted);font-size:14.5px}
+.quick-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+.qp{display:grid;gap:2px;text-align:left;background:var(--night);border:1.5px solid var(--line-2);border-radius:10px;padding:10px 12px}
+.qp:hover{border-color:var(--gold)}
+.qp-t{font:800 17px var(--display);letter-spacing:.06em;text-transform:uppercase}
+.qp-d{color:var(--muted);font-size:13.5px}
+.qp-c{font:900 26px/1.1 var(--display);color:var(--gold)}
+.qp-b{font-size:12px;font-weight:700;color:var(--ok)}
+.match{background:rgba(255,207,92,.12);border:1px solid rgba(255,207,92,.45);color:var(--ink);border-radius:10px;padding:10px 14px;font-size:15px}
+.match b{color:var(--gold)}
+.summary .matched{display:flex;justify-content:space-between;gap:10px;color:var(--gold);font-weight:700;font-size:14px;padding-top:6px}
+.ref{margin:0;font-size:14px;color:var(--sky)}
 /* the idea */
 .idea{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:18px 40px;padding-block:34px 6px;align-items:start}
 @media (max-width:820px){.idea{grid-template-columns:1fr}}
@@ -438,6 +454,7 @@ const frag=s=>{const t=document.createElement("template");t.innerHTML=s.trim();r
 const P=s=>new Date(s+"T00:00:00Z");
 const F=(s,o)=>P(s).toLocaleDateString("en-US",Object.assign({timeZone:"UTC"},o));
 const short=s=>F(s,{month:"short",day:"numeric"}), longDay=s=>F(s,{weekday:"long",month:"long",day:"numeric"});
+const weekOf=k=>{const d=P(k);d.setUTCDate(d.getUTCDate()-((d.getUTCDay()+6)%7));return d.toISOString().slice(0,10)};
 const addDays=(k,n)=>{const d=P(k);d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)};
 const money=c=>"$"+(c/100).toLocaleString("en-US",{minimumFractionDigits:c%100?2:0,maximumFractionDigits:2});
 const centralToday=()=>new Intl.DateTimeFormat("en-CA",{timeZone:"America/Chicago",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
@@ -537,7 +554,7 @@ function makeDemoBackend(){
     async uploadPhoto(wid,blob){return URL.createObjectURL(blob)},
     watchAdmin(cb){const f=()=>cb({pending:Object.values(messages).filter(m=>m.status==="pending").map(m=>({...m})),orders:Object.values(orders).sort((a,b)=>b.createdAt-a.createdAt).map(o=>({...o})),emails:{...emails}});L.add(f);f();return()=>L.delete(f)},
     async setup(){toast("The sample season is already set up")},
-    async saveSettings(s){Object.assign(season,s);emit()},
+    async saveSettings(s){const{matchName,matchCapCents,...rest}=s;Object.assign(season,rest,{match:matchName&&matchCapCents?{name:matchName,capCents:matchCapCents}:null});emit()},
     async importRoster(rows){let added=0,updated=0;const skipped=[];rows.forEach(r=>{const em=String(r.email||"").toLowerCase();if(!r.name||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){skipped.push(r.email||r.name);return}
       const ex=Object.keys(emails).find(k=>emails[k]===em);if(ex){Object.assign(W.find(w=>w.id===ex),{name:r.name,weight:r.weight||W.find(w=>w.id===ex).weight});updated++}
       else{const id="n"+(seq++);W.push({id,name:r.name,weight:r.weight||"",photoUrl:"",photoCutout:false,askText:DEFAULT_ASK(firstName(r.name)),active:true,raisedCents:0,daysPaid:0,sponsorCount:0});emails[id]=em;added++}});emit();return{added,updated,skipped}},
@@ -667,7 +684,8 @@ function poster(w){const first=firstName(w.name),full=w.name.replace(/\s*\(sampl
         h("div",{class:"bubble"},h("span",{class:"tape","aria-hidden":"true"}),paras.map(p=>h("p",null,p)),h("div",{class:"sig"},"♡ "+first)),
         h("div",{class:"corner"},
           h("a",{class:"cta",href:"#calendar",onclick:jump("calendar")},"Make "+first+"'s day"),
-          h("span",null,sponsors?[h("b",null,sponsors+" "+(sponsors===1?"person is":"people are")),` in ${first}'s corner`]:"Be the first in "+first+"'s corner")))))}
+          h("span",null,sponsors?[h("b",null,sponsors+" "+(sponsors===1?"person is":"people are")),` in ${first}'s corner`]:"Be the first in "+first+"'s corner")),
+        (()=>{const m=matchInfo();return m&&m.left?h("div",{class:"match"},h("b",null,"Doubled: "),m.name+" matches every dollar, up to "+money(m.cap)+". "+money(m.left)+" of matching left."):null})())))}
 
 function strip(w){const today=api.today();const live=days().filter(d=>!isOff(d.key));
   const months=[...new Set(live.map(d=>d.key.slice(0,7)))];
@@ -692,6 +710,30 @@ function rules(){const p=S.season.practicePriceCents;const post=days().filter(d=
     h("div",{class:"rule post"},h("b",null,"Postseason"),h("span",{class:"p num"},money(lo)+"–"+money(hi).slice(1)),h("span",null,"Regional · Sectional · State"))),
     h("p",{class:"backer-line"},h("b",null,S.season.rewardName+": "),S.season.rewardText))}
 
+/* ---------- evidence-backed nudges ---------- */
+// Matching gift (Karlan & List 2007): only shown when an organizer enters a real match.
+function matchInfo(){const m=S.season&&S.season.match;if(!m||!m.name||!m.capCents)return null;
+  const used=Math.min(S.team.raisedCents||0,m.capCents);return{name:m.name,cap:m.capCents,left:Math.max(0,m.capCents-used)}}
+// Social information (Shang & Croson 2009): a real ~90th-percentile gift to this wrestler. Needs 3+ sponsors; never invented.
+function referenceGift(){const map=dayMap(),by={};
+  Object.values(S.claims).forEach(c=>{if(c.status!=="paid"||!map[c.dayKey])return;by[c.orderId]=by[c.orderId]||{days:0,cents:0,ev:0};by[c.orderId].days++;by[c.orderId].cents+=priceOf(map[c.dayKey]);if(map[c.dayKey].kind==="event")by[c.orderId].ev++});
+  const list=Object.values(by).sort((a,b)=>a.cents-b.cents);if(list.length<3)return null;
+  return list[Math.floor(0.9*(list.length-1))]}
+function referenceLine(first){const r=referenceGift();if(!r)return null;
+  const what=r.ev&&r.days===r.ev?(r.ev===1?"a meet":r.ev+" meets"):r.days===1?"a practice":r.days+" days";
+  return "One of "+first+"'s sponsors backed "+what+" ("+money(r.cents)+")."}
+// Quick picks: one tap to a sensible choice. No amount is preselected (Altmann et al.: defaults shift gifts but not totals).
+function quickPicks(w,today){const first=firstName(w.name);const open=days().filter(d=>!isOff(d.key)&&!claimOf(d.key)&&d.key>=today);
+  const nextP=open.find(d=>d.kind==="practice"),nextE=open.find(d=>d.kind==="event");
+  let week=null;for(const d of open){if(d.kind!=="practice")continue;const wk=weekOf(d.key);const ks=open.filter(x=>x.kind==="practice"&&weekOf(x.key)===wk);if(ks.length>=3){week=ks;break}}
+  const go=keys=>()=>{S.sel=new Set(keys);render()};
+  const opts=[nextP&&{k:[nextP.key],t:"Her next practice",d:F(nextP.key,{weekday:"short",month:"short",day:"numeric"}),c:priceOf(nextP)},
+    week&&{k:week.map(x=>x.key),t:"A week of practice",d:"Week of "+short(weekOf(week[0].key))+" · "+week.length+" days",c:week.reduce((a,x)=>a+priceOf(x),0),star:week.length>=5},
+    nextE&&{k:[nextE.key],t:"Her next meet",d:nextE.name+" · "+short(nextE.key),c:priceOf(nextE),star:true}].filter(Boolean);
+  if(!opts.length)return null;const ref=referenceLine(first);
+  return h("div",{class:"quick"},h("div",{class:"quick-h"},h("b",null,"Quick picks"),ref?h("span",null,ref):null),
+    h("div",{class:"quick-row"},opts.map(o=>h("button",{class:"qp",onclick:go(o.k)},h("span",{class:"qp-t"},o.t),h("span",{class:"qp-d"},o.d),h("span",{class:"qp-c num"},money(o.c)),o.star?h("span",{class:"qp-b"},"Makes you a "+S.season.rewardName):null))))}
+
 /* ---------- month calendars ---------- */
 function calendar(w){
   const today=api.today(),first=firstName(w.name),map=dayMap();
@@ -700,6 +742,7 @@ function calendar(w){
   const sec=h("section",{class:"cal",id:"calendar"});
   sec.append(h("div",{class:"sechead"},h("h2",null,S.dayTool?"Turn days off":first+"'s season"),
     h("p",null,S.dayTool?"Organizer tool: tap a practice to cancel it or bring it back.":"Tap open days to pick them, or + for a whole week of practice. Then sponsor them together and leave her a note.")));
+  if(!S.dayTool){const q=quickPicks(w,today);if(q)sec.append(q)}
   sec.append(h("nav",{class:"monthnav","aria-label":"Months"},months.map(m=>{const open=days().filter(d=>d.key.startsWith(m)&&!isOff(d.key)&&!claimOf(d.key)).length;
     return h("a",{href:"#m-"+m,onclick:jump("m-"+m)},F(m+"-01",{month:"short"}),h("small",null,open+" open"))})));
   sec.append(h("div",{class:"legend"},h("span",null,h("i",{style:"background:var(--navy);border:1.5px solid var(--line-2)"}),"Practice"),
@@ -869,7 +912,9 @@ function checkoutSheet(box,m){const w=curW(),s=picks(m.keys),first=firstName(w.n
     const err=h("p",{class:"err",role:"alert"});
     box.append(h("h3",{id:"sheet-h"},org?"Record a sponsor":"Make "+first+"'s day"),
       h("div",{class:"summary"},s.items.slice(0,5).map(d=>h("div",null,h("span",null,F(d.key,{weekday:"short",month:"short",day:"numeric"})+" · "+(d.kind==="event"?d.name:"Practice")),h("span",{class:"num"},money(priceOf(d))))),
-        s.items.length>5?h("div",null,h("span",null,"+ "+(s.items.length-5)+" more"),h("span",null,"")):null,h("div",{class:"tot"},h("span",null,"Total"),h("span",{class:"num"},money(s.total)))),
+        s.items.length>5?h("div",null,h("span",null,"+ "+(s.items.length-5)+" more"),h("span",null,"")):null,h("div",{class:"tot"},h("span",null,"Total"),h("span",{class:"num"},money(s.total))),
+        (()=>{const m=matchInfo();if(!m||!m.left)return null;const add=Math.min(s.total,m.left);return h("div",{class:"matched"},h("span",null,m.name+" matches it"),h("span",{class:"num"},"+"+money(add)+" → "+money(s.total+add)+" for the team"))})()),
+      (()=>{const r=referenceLine(first);return r?h("p",{class:"ref"},r):null})(),
       h("label",{class:"field",for:"c-msg"},h("span",null,"Your note to "+first+" ",h("small",null,"(she opens it the morning of your day)")),msg,cnt),
       s.items.length>1?h("label",{class:"field",for:"c-rev"},"She opens it on",rev):h("p",{class:"mod",style:"border-color:var(--sky)"},"She opens it the morning of "+longDay(s.items[0].key)+"."),
       h("label",{class:"field",for:"c-name"},"Your name",name),
@@ -937,11 +982,14 @@ function orgPanel(){const wrap=h("section",{class:"org",id:"organizer"});
   else if(S.orgTab==="roster")wrap.append(rosterTools());
   else{const pp=h("input",{class:"inp",id:"s-price",type:"number",min:"1",max:"100",step:"1",value:String(S.season.practicePriceCents/100),style:"width:110px"});
     const rn=h("input",{class:"inp",id:"s-rn",value:S.season.rewardName}),rt=h("textarea",{class:"inp",id:"s-rt"}),pn=h("input",{class:"inp",id:"s-pn",value:S.season.payNote});rt.value=S.season.rewardText;
+    const mt=S.season.match||{};const mn=h("input",{class:"inp",id:"s-mn",value:mt.name||"",placeholder:"e.g. a local business"}),mc=h("input",{class:"inp",id:"s-mc",type:"number",min:"0",step:"50",value:mt.capCents?String(mt.capCents/100):"",placeholder:"0",style:"width:130px"});
     wrap.append(h("div",{style:"display:grid;gap:12px;max-width:640px;margin-top:14px"},
       h("div",{style:"display:flex;gap:12px;flex-wrap:wrap"},h("label",{class:"field",for:"s-price"},"Practice price ($)",pp),h("label",{class:"field",for:"s-rn",style:"flex:1;min-width:200px"},"Reward name",rn)),
       h("p",{class:"mod"},"A meet always costs 5 practices. Price changes apply to new sponsorships."),
       h("label",{class:"field",for:"s-rt"},"What a Backer gets",rt),h("label",{class:"field",for:"s-pn"},"Where the money goes (How it works)",pn),
-      h("div",{class:"btns",style:"justify-content:flex-start"},h("button",{class:"btn blu",onclick:()=>api.saveSettings({practicePriceCents:Math.round(+pp.value*100),rewardName:rn.value.trim(),rewardText:rt.value.trim(),payNote:pn.value.trim()}).then(()=>toast("Saved")).catch(e=>toast(errText(e)))},"Save settings"),
+      h("div",{style:"display:flex;gap:12px;flex-wrap:wrap;align-items:end"},h("label",{class:"field",for:"s-mn",style:"flex:1;min-width:200px"},"Matching sponsor",mn),h("label",{class:"field",for:"s-mc"},"Match up to ($)",mc)),
+      h("p",{class:"mod"},"A real 1:1 match is the strongest proven boost for a fundraiser. Fill this in only when a sponsor has actually committed. Leave it blank and nothing shows."),
+      h("div",{class:"btns",style:"justify-content:flex-start"},h("button",{class:"btn blu",onclick:()=>api.saveSettings({practicePriceCents:Math.round(+pp.value*100),rewardName:rn.value.trim(),rewardText:rt.value.trim(),payNote:pn.value.trim(),matchName:mn.value.trim(),matchCapCents:Math.round((+mc.value||0)*100)}).then(()=>toast("Saved")).catch(e=>toast(errText(e)))},"Save settings"),
         h("button",{class:"btn"+(S.dayTool?" blu":""),onclick:()=>{S.dayTool=!S.dayTool;S.sel.clear();render();if(S.dayTool)document.getElementById("calendar").scrollIntoView({behavior:"smooth"})}},S.dayTool?"Done turning days off":"Turn practice days off"),
         h("button",{class:"btn",onclick:()=>api.setup().then(()=>toast("Schedule reloaded")).catch(e=>toast(errText(e)))},"Reload schedule"))))}
   return wrap}
