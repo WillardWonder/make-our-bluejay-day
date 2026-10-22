@@ -666,8 +666,8 @@ function poster(w){const first=firstName(w.name),full=w.name.replace(/\s*\(sampl
         h("h1",{class:"name"},full),
         h("div",{class:"bubble"},h("span",{class:"tape","aria-hidden":"true"}),paras.map(p=>h("p",null,p)),h("div",{class:"sig"},"♡ "+first)),
         h("div",{class:"corner"},
-          h("a",{class:"cta",href:"#calendar",onclick:jump("calendar")},"Sponsor a day"),
-          h("span",null,sponsors?[h("b",null,sponsors+" "+(sponsors===1?"person is":"people are")),` in ${first}'s corner`]:"Be the first person in "+first+"'s corner")))))}
+          h("a",{class:"cta",href:"#calendar",onclick:jump("calendar")},"Make "+first+"'s day"),
+          h("span",null,sponsors?[h("b",null,sponsors+" "+(sponsors===1?"person is":"people are")),` in ${first}'s corner`]:"Be the first in "+first+"'s corner")))))}
 
 function strip(w){const today=api.today();const live=days().filter(d=>!isOff(d.key));
   const months=[...new Set(live.map(d=>d.key.slice(0,7)))];
@@ -760,7 +760,7 @@ function cartBar(w){const s=picks();const first=firstName(w.name);
     h("span",{class:"sum num"},money(s.total)),
     h("span",{class:"what"},s.items.length+" day"+(s.items.length>1?"s":"")+" for "+first+(s.units>=5?" · you'll be a "+S.season.rewardName:s.units>0?" · "+(5-s.units)+" more practice"+(5-s.units>1?"s":"")+" to be a "+S.season.rewardName:"")),
     h("button",{class:"clr",onclick:()=>{S.sel.clear();render()}},"Clear"),
-    h("button",{class:"go",onclick:()=>{S.modal={type:"checkout",step:1,keys:[...S.sel],form:{donorName:"",anon:false,contact:"",message:"",revealDay:s.items[0].key}};render()}},S.auth.admin?"Record":"Sponsor")))}
+    h("button",{class:"go",onclick:()=>{S.modal={type:"checkout",step:1,keys:[...S.sel],form:{donorName:"",anon:false,contact:"",message:"",revealDay:s.items[0].key}};render()}},S.auth.admin?"Record":"Make her day")))}
 
 /* ---------- backers / standings / how ---------- */
 function backers(w){const map=dayMap();const t={};
@@ -770,7 +770,7 @@ function backers(w){const map=dayMap();const t={};
     list.length?h("div",{class:"backers"},list.map(b=>h("span",{class:"backer"},h("img",{src:"bluejay.png",alt:""}),b.name))):h("p",{class:"empty"},"No Backers yet. Pick five practices or a meet to be the first."))}
 
 function standings(){const list=roster().slice().sort((a,b)=>(b.raisedCents||0)-(a.raisedCents||0));const top=Math.max(1,...list.map(w=>w.raisedCents||0));
-  return h("section",{class:"panel",id:"standings"},h("div",{class:"sechead"},h("h2",null,"Team standings"),h("p",null,"Who's filling their calendar fastest. It all goes to the whole team.")),
+  return h("section",{class:"panel",id:"standings"},h("div",{class:"sechead"},h("h2",null,"Team standings"),h("p",null,"Every girl's calendar, side by side. Every day sponsored supports the whole team.")),
     h("div",{class:"teamtotal"},h("b",{class:"num"},money(S.team.raisedCents||0)),h("span",null,"raised by the team · "+(S.team.daysPaid||0)+" days sponsored")),
     list.length>=3&&list[0].raisedCents?h("div",{class:"podium"},[1,0,2].map(i=>{const w=list[i];return h("button",{class:"pod p"+(i+1),onclick:()=>{select(w.id);window.scrollTo({top:0})},"aria-label":`${i+1}. ${w.name}, ${money(w.raisedCents||0)}`},
       h("span",{class:"av",style:w.photoUrl?`background-image:url("${encodeURI(w.photoUrl)}")`:""},w.photoUrl?"":initials(firstName(w.name))),
@@ -867,10 +867,10 @@ function checkoutSheet(box,m){const w=curW(),s=picks(m.keys),first=firstName(w.n
     const msg=h("textarea",{class:"inp note-in",id:"c-msg",maxlength:"280",placeholder:`Dear ${first}, …`,oninput:e=>{f.message=e.target.value;cnt.textContent=f.message.length+"/280"}});msg.value=f.message;
     const rev=h("select",{class:"inp",id:"c-rev",onchange:e=>f.revealDay=e.target.value},s.items.map(d=>h("option",{value:d.key},F(d.key,{weekday:"short",month:"short",day:"numeric"})+(d.kind==="event"?" · "+d.name:" · practice"))));rev.value=f.revealDay;
     const err=h("p",{class:"err",role:"alert"});
-    box.append(h("h3",{id:"sheet-h"},org?"Record a sponsor":"Back "+first),
+    box.append(h("h3",{id:"sheet-h"},org?"Record a sponsor":"Make "+first+"'s day"),
       h("div",{class:"summary"},s.items.slice(0,5).map(d=>h("div",null,h("span",null,F(d.key,{weekday:"short",month:"short",day:"numeric"})+" · "+(d.kind==="event"?d.name:"Practice")),h("span",{class:"num"},money(priceOf(d))))),
         s.items.length>5?h("div",null,h("span",null,"+ "+(s.items.length-5)+" more"),h("span",null,"")):null,h("div",{class:"tot"},h("span",null,"Total"),h("span",{class:"num"},money(s.total)))),
-      h("label",{class:"field",for:"c-msg"},h("span",null,"Your note to "+first+" ",h("small",null,"(the best part)")),msg,cnt),
+      h("label",{class:"field",for:"c-msg"},h("span",null,"Your note to "+first+" ",h("small",null,"(she opens it the morning of your day)")),msg,cnt),
       s.items.length>1?h("label",{class:"field",for:"c-rev"},"She opens it on",rev):h("p",{class:"mod",style:"border-color:var(--sky)"},"She opens it the morning of "+longDay(s.items[0].key)+"."),
       h("label",{class:"field",for:"c-name"},"Your name",name),
       h("label",{class:"check"},anon,"Show me as Anonymous on her calendar"),
@@ -882,27 +882,27 @@ function checkoutSheet(box,m){const w=curW(),s=picks(m.keys),first=firstName(w.n
         e.target.disabled=true;e.target.textContent="Holding your days…";
         try{m.order=await api.createOrder({wrestlerId:w.id,dayKeys:s.items.map(d=>d.key),donorName:f.donorName.trim(),anon:f.anon,contact:f.contact.trim(),message:f.message.trim(),revealDay:f.revealDay});m.step=2;render()}
         catch(er){const tk=er.details&&er.details.taken;if(tk){tk.forEach(k=>S.sel.delete(k));m.keys=m.keys.filter(k=>!tk.includes(k));if(!m.keys.length){close();toast("Those days were just taken. Pick others.");return}err.textContent="Someone just took "+tk.map(short).join(", ")+". It's off your list.";}else err.textContent=errText(er);
-          e.target.disabled=false;e.target.textContent="Continue to payment"}}},org?"Continue":"Continue to payment")))}
+          e.target.disabled=false;e.target.textContent="Continue"}}},"Continue")))}
   else if(m.step===2&&org){const err=h("p",{class:"err",role:"alert"});
     const rec=async(method,btn)=>{btn.disabled=true;try{await api.recordPayment({wrestlerId:w.id,dayKeys:s.items.map(d=>d.key),donorName:m.form.donorName.trim(),anon:m.form.anon,contact:m.form.contact,message:m.form.message,revealDay:m.form.revealDay,method});
       m.paid={total:s.total,units:s.units};m.step=3;S.sel.clear();render()}catch(e){err.textContent=errText(e);btn.disabled=false}};
     box.append(h("h3",{id:"sheet-h"},"How did they pay?"),h("div",{class:"paybox"},h("span",{class:"amt num"},money(s.total)),h("span",null,m.form.donorName+" → "+first)),err,
       h("div",{class:"btns"},h("button",{class:"btn",onclick:()=>{m.step=1;render()}},"Back"),[["cash","Cash"],["check","Check"],["venmo","Venmo received"]].map(([k,l])=>h("button",{class:"btn blu",onclick:e=>rec(k,e.target)},l))))}
   else if(m.step===2&&S.payMode==="manual"){const o=m.order;const memo=first+" – "+m.form.donorName.trim();const el=h("div",{class:"share",style:"text-align:center"},memo);
-    box.append(h("h3",{id:"sheet-h"},"Pay the team"),h("div",{class:"paybox"},h("span",{class:"amt num"},money(o.amountCents)),h("span",null,S.season.payNote),
+    box.append(h("h3",{id:"sheet-h"},"Send your support"),h("div",{class:"paybox"},h("span",{class:"amt num"},money(o.amountCents)),h("span",null,S.season.payNote),
       h("span",{style:"font-size:14px;color:var(--muted)"},"Put this in the memo so the coaches can match it:"),el,h("button",{class:"btn",onclick:()=>copy(memo,el)},"Copy memo")),
       h("p",{class:"mod"},"Your days are held for 3 days. They turn blue on her calendar as soon as a coach confirms your payment."),
       h("div",{class:"btns"},h("button",{class:"btn pri",onclick:()=>{m.paid={total:o.amountCents,units:s.units,pending:true};m.step=3;S.sel.clear();render()}},"Got it")))}
   else if(m.step===2){const o=m.order,err=h("p",{class:"err",role:"alert"}),timer=h("div",{class:"timer num"});
     const tick=()=>{const left=Math.max(0,o.holdExpires-Date.now());timer.textContent=left?"Your days are held for "+Math.floor(left/60000)+":"+String(Math.floor(left/1000)%60).padStart(2,"0"):"Your hold ran out. You can still pay if nobody else took the days."};
     clearInterval(holdTimer);holdTimer=setInterval(tick,1000);tick();
-    box.append(h("h3",{id:"sheet-h"},"Pay the team"),h("div",{class:"paybox"},h("span",{class:"amt num"},money(o.amountCents)),h("span",null,"to the Merrill Wrestling booster club"),
+    box.append(h("h3",{id:"sheet-h"},"Send your support"),h("div",{class:"paybox"},h("span",{class:"amt num"},money(o.amountCents)),h("span",null,"for "+first+" and the Merrill girls wrestling team"),
       h("button",{class:"paybtn",onclick:async e=>{const b=e.currentTarget;b.disabled=true;b.firstChild.textContent="Processing…";
         try{const r=await api.mockPay(o.orderId);clearInterval(holdTimer);if(r.status==="conflict"){err.textContent="Your hold ran out and someone else took a day. An organizer will refund you.";return}
-          m.paid={total:o.amountCents,units:s.units};m.step=3;S.sel.clear();render()}catch(er){err.textContent=errText(er);b.disabled=false;b.firstChild.textContent="Pay with Venmo"}}},
-        "Pay with Venmo",h("small",null,S.payMode==="mock"?"Test mode · no money moves":"Opens secure checkout")),timer),err,
+          m.paid={total:o.amountCents,units:s.units};m.step=3;S.sel.clear();render()}catch(er){err.textContent=errText(er);b.disabled=false;b.firstChild.textContent="Send "+money(o.amountCents)+" with Venmo"}}},
+        "Send "+money(o.amountCents)+" with Venmo",h("small",null,S.payMode==="mock"?"Test mode · no money moves":"Opens secure checkout")),timer),err,
       S.payMode==="mock"?h("p",{class:"mod"},"Stand-in payment step. When the booster club picks its processor, this button opens that checkout and the calendar updates when the payment clears."):null,
-      h("div",{class:"btns"},h("button",{class:"btn",onclick:close},"Pay later")))}
+      h("div",{class:"btns"},h("button",{class:"btn",onclick:close},"Finish later")))}
   else{const backer=m.paid.units>=5;
     box.append(h("div",{class:"done"},h("img",{src:"bluejay.png",alt:""}),h("h3",{id:"sheet-h"},"You made "+first+"'s day"),
       h("p",{style:"margin:0;color:var(--muted)"},money(m.paid.total)+(m.paid.pending?" for the team, once your payment arrives. ":" for the team. ")+(m.form.message?"Your note is sealed. She'll open it the morning of "+longDay(m.form.revealDay)+".":"Thank you for backing Merrill girls wrestling.")),
